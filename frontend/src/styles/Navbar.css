@@ -1,0 +1,111 @@
+/* Modern compact navbar styles — standard size */
+.navbar {
+  position: relative;
+  height: 92px; /* taller navbar to support much larger logo */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  background: #ffffff;
+  box-shadow: 0 1px 6px rgba(10, 25, 15, 0.06);
+  z-index: 40;
+}
+
+.navbar-logo img.logo-img {
+  height: 84px; /* much larger brand mark for visibility */
+  object-fit: contain;
+}
+
+/* Keep logo slightly smaller on narrow screens */
+@media (max-width: 480px) {
+  .navbar { height: 84px; }
+  .navbar-logo img.logo-img { height: 76px; }
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li a {
+  color: #094A25;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.navbar-links li a:hover {
+  background: rgba(9,74,37,0.12);
+  color: #094A25;
+}
+
+.settings-container { position: relative; }
+.settings-toggle {
+  display: none; /* shown on small screens */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-toggle svg { color: #094A25; }
+
+.settings-dropdown {
+  position: absolute;
+  right: 0.6rem;
+  top: calc(100% + 8px);
+  width: 220px;
+  /* light green card background for phone preview */
+  background: #f3faf4;
+  color: #094A25;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  padding: 0.5rem;
+  z-index: 60;
+}
+
+.settings-dropdown ul { list-style: none; margin: 0; padding: 0; }
+.settings-dropdown li { margin: 0; }
+.settings-dropdown li a { display: block; padding: 0.55rem 0.6rem; border-radius: 6px; color: inherit; text-decoration: none; }
+.settings-dropdown li a:hover { background: rgba(9,74,37,0.08); color: #094A25; }
+
+/* Mobile accordion styles inside settings */
+.settings-dropdown .mob-item { border-radius: 6px; overflow: hidden; }
+.mob-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.6rem; background: transparent; border: none; color: inherit; cursor: pointer; font-size: 0.95rem; }
+.mob-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+.mob-link { flex: 1; text-align: left; padding: 0.55rem 0.6rem; color: inherit; text-decoration: none; }
+.mob-expand { background: transparent; border: none; padding: 0.45rem 0.6rem; cursor: pointer; }
+.mob-toggle.sub { padding-left: 0.6rem; }
+.mob-nested { list-style: none; padding-left: 0.65rem; margin: 0; border-left: 3px solid rgba(9,74,37,0.12); background: rgba(9,74,37,0.01); border-radius: 0 6px 6px 0; }
+.mob-nested li a { padding: 0.45rem 0.6rem; font-size: 0.92rem; display: block; }
+.mob-nested li a:hover { background: rgba(9,74,37,0.06); color: #094A25; }
+.sub-nested { padding-left: 0.6rem; border-left: 2px solid rgba(9,74,37,0.08); margin-left: 0.25rem; }
+.caret { transition: transform 180ms ease; }
+.caret.open { transform: rotate(180deg); }
+
+.sub-nested li a:hover { background: rgba(9,74,37,0.06); color: #094A25; }
+
+/* Desktop nested submenu container border */
+.dropdown-menu li > div { border-left: 3px solid rgba(9,74,37,0.06); padding-left: 0.45rem; border-radius: 6px; }
+.dropdown-menu li > div a { display: block; padding: 0.45rem 0.6rem; border-radius: 6px; color: inherit; text-decoration: none; background: transparent; }
+.dropdown-menu li > div a:hover { background: rgba(9,74,37,0.04); }
+
+/* Responsive: hide full links on small screens, show compact settings */
+@media (max-width: 880px) {
+  .navbar-links { display: none; }
+  .settings-toggle { display: flex; }
+}
+
+/* Keep standard look on wider screens */
+@media (min-width: 881px) {
+  .settings-toggle { display: none; }
+}

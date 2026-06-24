@@ -1,0 +1,887 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+/* --- Desktop Icons (Hidden on Desktop) --- */
+.menu-icon-svg {
+  display: none;
+}
+
+.mobile-close-btn {
+  display: none;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+  color: #1f2937;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+  color: #053018;
+}
+
+.partner-name-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.partner-name-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #1f2937;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1000;
+}
+
+.navbar-logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #43B5A6;
+  margin-right: auto;
+  filter: drop-shadow(0 0 4px rgba(67, 181, 166, 0.3));
+  height: 60px;
+  width: auto;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo-img {
+  height: 100px;
+  max-width: 150px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.navbar-links li {
+  position: relative;
+}
+
+/* --- Global Dropdown Fixes --- */
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dropdown-toggle {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.dropdown-arrow {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+}
+
+/* Arrow points down by default, flips up when open */
+.dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+  color: #43B5A6;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdownItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: -80px;
+  min-width: 250px;
+  background: white;
+  color: #1f2937;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  z-index: 2000;
+  list-style: none;
+  margin: 0;
+  margin-top: 0.5rem;
+  transform-origin: top center;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 0.7rem 1.25rem;
+  color: #1f2937;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.dropdown-menu li a:hover {
+  background: linear-gradient(90deg, #e0f7f5 0%, #f0fdfa 100%);
+  color: #0f766e;
+  padding-left: 1.5rem;
+  border-left: 3px solid #43B5A6;
+}
+
+.dropdown-menu li a:active {
+  background: #ccfbf1;
+}
+
+.dropdown.open > .dropdown-menu {
+  display: block;
+  animation: dropdownSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dropdown.open > .dropdown-menu li {
+  animation: dropdownItemFadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+.dropdown.open > .dropdown-menu li:nth-child(1) { animation-delay: 0.04s; }
+.dropdown.open > .dropdown-menu li:nth-child(2) { animation-delay: 0.08s; }
+.dropdown.open > .dropdown-menu li:nth-child(3) { animation-delay: 0.12s; }
+.dropdown.open > .dropdown-menu li:nth-child(4) { animation-delay: 0.16s; }
+.dropdown.open > .dropdown-menu li:nth-child(5) { animation-delay: 0.20s; }
+.dropdown.open > .dropdown-menu li:nth-child(6) { animation-delay: 0.24s; }
+.dropdown.open > .dropdown-menu li:nth-child(7) { animation-delay: 0.28s; }
+.dropdown.open > .dropdown-menu li:nth-child(8) { animation-delay: 0.32s; }
+.dropdown.open > .dropdown-menu li:nth-child(9) { animation-delay: 0.36s; }
+
+/* make dropdowns scrollable on small screens */
+@media (max-width: 640px) {
+  .dropdown-menu {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+.navbar-links a {
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.navbar-links a:hover {
+  background-color: #43B5A6;
+  color: white;
+}
+
+.navbar-links a.active {
+  background-color: #2D9B8C;
+  color: white;
+}
+
+/* --- Menu Overlay --- */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+/* --- Hamburger Menu --- */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+  z-index: 1001; /* Stay above the drawer */
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #1f2937;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .page {
+    width: 100%;
+    flex: 1;
+    padding: 2rem 4rem; /* Adds generous padding on the sides for laptop/desktop */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flip-card {
+    height: 350px; /* Taller cards for laptop/desktop to fill more vertical space */
+  }
+}
+
+/* ensure very small screens use shorter cards */
+@media (max-width: 767px) {
+  .flip-card {
+    height: 260px;
+  }
+}
+
+.flip-card {
+  perspective: 1200px; /* consistent 3d perspective for all cards */
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px; /* Slightly more rounded for a modern look */
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Image Styling --- */
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This ensures the image fills the entire card area */
+  display: block;
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+  color: white;
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.image-overlay h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* --- Back Side Styling --- */
+.flip-card-back {
+  background: linear-gradient(135deg, #43B5A6 0%, #2D9B8C 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  transform: rotateY(180deg);
+  text-align: center;
+}
+
+.flip-card-back h4 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.flip-card-back p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.details-btn {
+  background: white;
+  color: #43B5A6;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 30px;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+.details-btn:hover {
+  transform: scale(1.05);
+}
+
+/* --- Mobile Responsive (Drawer Style) --- */
+@media (max-width: 768px) {
+
+  .mobile-close-btn {
+    display: flex;
+    align-self: flex-end;
+    background: none;
+    border: none;
+    padding: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    color: #374151;
+  }
+
+
+  .hamburger {
+    display: flex;
+  }
+
+  /* Updated padding to accommodate the close button at the top */
+  .navbar-links {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 280px;
+    max-width: 85vw;
+    height: auto;
+    max-height: calc(100vh - 30px);
+    flex-direction: column;
+    background: white;
+    border-radius: 20px;
+    padding: 10px 0.5rem 1.5rem 0.5rem !important; /* Adjusted top padding */
+    gap: 5px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    z-index: 999;
+    overflow-y: auto;
+    display: flex !important;
+  }
+
+  .navbar-links.active {
+    transform: translateX(0); /* Slide in */
+  }
+
+  .navbar-links li {
+    width: 100%;
+    border-bottom: none !important;
+    padding: 2px 0 !important;
+  }
+
+  .navbar-links a {
+    display: block;
+    text-align: left;
+    padding: 0.8rem 1.2rem !important;
+    margin: 0 10px;
+    border-radius: 12px;
+    color: #374151;
+  }
+
+  /* Dropdown positioning inside the side drawer */
+  .navbar-links li.dropdown {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dropdown-header {
+    justify-content: space-between;
+    padding: 0 10px;
+  }
+
+  .dropdown-menu {
+    position: static; /* Push content down instead of floating */
+    width: auto;
+    background: #f3f4f6; /* Gray background for nested items */
+    margin: 5px 15px;
+    border-radius: 10px;
+    box-shadow: none;
+    border: none;
+    left: auto;
+    min-width: auto;
+    flex: 0 0 100%;
+    display: none;
+  }
+
+  .dropdown.open > .dropdown-menu {
+    display: block !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .dropdown-menu li a {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Disable dropdown animations on mobile - items appear instantly */
+  .dropdown.open > .dropdown-menu {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .dropdown.open > .dropdown-menu li {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Hamburger animation */
+  .hamburger.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+  .hamburger.active .bar:nth-child(2) { opacity: 0; }
+  .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+}
+
+/* Container for the flip effect */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* The actual flip action */
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* For Safari */
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Front Side Overlay */
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  color: white;
+  padding: 20px;
+  text-align: left;
+}
+
+/* Back Side Styling */
+.flip-card-back {
+  background: linear-gradient(135deg, #43B5A6 0%, #2D9B8C 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  transform: rotateY(180deg); /* Pre-flipped */
+  text-align: center;
+}
+
+.centers-grid {
+  display: grid;
+  /* This creates exactly 3 columns on desktop and stretches them to fill space */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 2rem;
+  width: 100%;
+}
+
+.flip-card {
+  height: 450px; /* Increased height for a "big" look */
+  perspective: 1500px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Important: Hides the side not facing the user */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Crucial: ensures image fills card perfectly */
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  color: white;
+  padding: 1.5rem;
+}
+
+.flip-card-back {
+  background: linear-gradient(135deg, #43B5A6 0%, #2D9B8C 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  transform: rotateY(180deg); /* Card starts flipped over */
+  text-align: center;
+}
+
+.details-btn {
+  background: white;
+  color: #43B5A6;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* --- Responsive Adjustments --- */
+
+/* Tablets: 2 columns */
+@media (max-width: 1024px) {
+  .centers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .page {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Mobile: 1 column and slightly shorter cards */
+@media (max-width: 768px) {
+  .centers-grid {
+    grid-template-columns: 1fr;
+  }
+  .flip-card {
+    height: 360px; /* larger card on phones so content fits */
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+  /* Bigger letter for BUILT on phones */
+  .pillar-letter {
+    font-size: clamp(36px, 12vw, 84px) !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+  .page {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Bukid hub specific responsive fixes */
+  .bukid-hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .bukid-hero-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bukid-about-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .bukid-focus-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .bukid-zones-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .bukid-ops-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .features {
+    padding: 1.5rem 0.5rem;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .feature-card {
+    padding: 1.2rem 1rem;
+  }
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+  .hero p {
+    font-size: 0.95rem;
+  }
+  .hero {
+    padding: 2.5rem 1.2rem;
+  }
+}
+
+/* --- Hero, Features, Footer (Unchanged) --- */
+.hero { background: linear-gradient(135deg, #43B5A6, #5ACBBD); color: white; padding: 4rem 2rem; position: relative; }
+.hero-content { max-width: 800px; position: relative; z-index: 3; }
+.hero h1 { font-size: clamp(1.6rem, 5vw, 2.8rem); margin-bottom: 0.5rem; }
+.hero p { font-size: 1.2rem; margin-bottom: 1.5rem; }
+.hero-btn { background-color: #f6ad55; color: #1f2937; padding: 0.7rem 1.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; }
+.hero-btn:hover { background-color: #ed8936; }
+.features { padding: 3rem 2rem; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1.5rem; }
+.feature-card { background: white; border-radius: 16px; padding: 1.8rem 1.5rem; box-shadow: 0 6px 20px rgba(0,0,0,0.08); position: relative; }
+.feature-number { position: absolute; top: -16px; left: 16px; background-color: #43B5A6; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.feature-card h3 { margin-top: 1.2rem; margin-bottom: 0.5rem; color: #1f2937; }
+.feature-card p { color: #4b5563; font-size: 0.95rem; }
+.page { padding: 3rem 2rem; width: 100%; flex: 1; display: flex; flex-direction: column; box-sizing: border-box; background: linear-gradient(135deg, #e0f7f5 0%, #fffacd 50%, #ffe4cc 100%); }
+
+/* --- Technology Transfer: Downloadable Forms --- */
+.tt-forms-panel {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 18px;
+  padding: 1rem;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.10);
+}
+
+.tt-forms-title {
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #166534;
+}
+
+.tt-forms-titleIcon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.tt-forms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tt-forms-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.10);
+  text-decoration: none;
+  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.tt-forms-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(34, 197, 94, 0.26);
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.10);
+}
+
+.tt-forms-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.28), 0 10px 20px rgba(17, 24, 39, 0.10);
+}
+
+.tt-forms-fileIcon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(17, 24, 39, 0.14);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(17, 24, 39, 0.08);
+}
+
+.tt-forms-fileIcon::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 9px;
+  bottom: 9px;
+  background:
+    linear-gradient(to bottom,
+      rgba(31, 41, 55, 0.20) 0px,
+      rgba(31, 41, 55, 0.20) 1px,
+      transparent 1px,
+      transparent 7px);
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.tt-forms-fileIcon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0) 50%, #dcfce7 50%);
+  border-left: 1px solid rgba(34, 197, 94, 0.22);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.22);
+}
+
+.tt-forms-name {
+  min-width: 0;
+}
+
+.tt-forms-downloadIcon {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #22c55e;
+  opacity: 0.75;
+}
+
+@media (max-width: 767px) {
+  .tt-forms-panel {
+    padding: 0.85rem;
+  }
+
+  .tt-forms-item {
+    padding: 0.75rem 0.8rem;
+    font-size: 0.86rem;
+  }
+}
+.page h2 { color: #43B5A6; margin-bottom: 1rem; }
+.footer { background: linear-gradient(135deg, #0f5c3f 0%, #1a2332 100%); color: #d1d5db; text-align: center; padding: 1.5rem 1rem; margin-top: auto; }
+.footer p { margin: 0.3rem 0; }
+
+/* Default pillar letter size */
+.pillar-letter {
+  font-size: clamp(22px, 4vw, 44px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+  /* Project MAUYA responsive collapse: make grids single-column on phones */
+  .project-hero-grid,
+  .project-hero-stats,
+  .project-about-grid,
+  .project-about-info-grid,
+  .project-systems-grid,
+  .project-components-grid,
+  .project-outputs-grid,
+  .project-impact-grid,
+  .project-lead-grid,
+  .project-leaders-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Make system cards a bit taller on phones so content fits comfortably */
+  .project-systems-grid > div {
+    min-height: 320px;
+  }

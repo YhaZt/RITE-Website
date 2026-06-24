@@ -1,0 +1,231 @@
+.org-chart {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.org-chart__panel {
+  min-width: 1040px;
+  margin: 0 auto;
+  border-radius: 22px;
+  background: #4cc3b8;
+  box-shadow: 0 20px 48px rgba(2, 6, 23, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  overflow: hidden;
+}
+
+.org-chart__header {
+  background: linear-gradient(90deg, #2f855a 0%, #3f8f5d 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: 0.9rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.org-chart__main {
+  padding: 1.35rem 1rem 1.6rem;
+}
+
+.org-chart__vertical-group {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.org-chart__card {
+  width: min(100%, 220px);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: #f8fafc;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+}
+
+.org-chart__card--compact {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.org-chart__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: linear-gradient(180deg, #203044, #0f172a);
+  border: 2px solid rgba(110, 231, 183, 0.24);
+  display: grid;
+  place-items: center;
+}
+
+.org-chart__avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.org-chart__avatar-fallback {
+  color: #d1fae5;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.org-chart__card-copy {
+  min-width: 0;
+}
+
+.org-chart__card-copy h4 {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.org-chart__card-copy p {
+  margin: 0.2rem 0 0;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.org-chart__connector {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+.org-chart__connector--vertical {
+  width: 2px;
+  height: 24px;
+}
+
+.org-chart__connector--drop {
+  width: 2px;
+  height: 18px;
+  margin: 0 auto;
+}
+
+.org-chart__branch-line {
+  width: min(66%, 720px);
+  height: 2px;
+  margin: 0.2rem auto 0;
+  background: rgba(148, 163, 184, 0.45);
+}
+
+.org-chart__branch-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.95fr 1.25fr;
+  gap: 1rem;
+  align-items: start;
+  margin-top: 0.1rem;
+}
+
+.org-chart__branch-column {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.org-chart__branch-column--center {
+  align-content: start;
+}
+
+.org-chart__branch-label {
+  min-height: 2.5rem;
+  display: grid;
+  place-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #a1c45f 0%, #93b852 100%);
+  color: #ffffff;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.org-chart__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.org-chart__row .org-chart__card {
+  width: 208px;
+}
+
+.org-chart__center-node {
+  min-height: 160px;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  padding-top: 0.6rem;
+}
+
+.org-chart__center-node .org-chart__card {
+  width: 220px;
+}
+
+.org-chart__foundation {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 2.2rem;
+}
+
+.org-chart__pill {
+  min-width: 180px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #a1c45f 0%, #93b852 100%);
+  color: #ffffff;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 1100px) {
+  .org-chart__panel {
+    min-width: 0;
+  }
+
+  .org-chart__branch-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .org-chart__branch-line {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .org-chart__header {
+    font-size: 0.95rem;
+  }
+
+  .org-chart__card {
+    width: 100%;
+    max-width: 290px;
+  }
+
+  .org-chart__row .org-chart__card,
+  .org-chart__center-node .org-chart__card {
+    width: 100%;
+    max-width: 290px;
+  }
+}
