@@ -10,6 +10,9 @@
         <p class="hero-desc">
           The Technology Transfer and Patent Unit (TTPU) serves as the institutional bridge between research innovation and commercialization, enabling community impact.
         </p>
+        <button @click="showModal = true" class="btn-hero-action">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:8px; vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Submit Patent &amp; Tech Transfer Application
+        </button>
       </div>
     </section>
 
@@ -57,7 +60,7 @@
           <div class="forms-card-glow"></div>
           <div class="forms-card-content">
             <h4 class="forms-header">
-              <span class="forms-icon">📋</span>
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" class="forms-svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               Forms &amp; Disclosures
             </h4>
             
@@ -70,10 +73,10 @@
                 class="form-link-item"
               >
                 <div class="file-icon-box">
-                  <span class="file-icon">📄</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
                 </div>
                 <span class="form-name">{{ form.name }}</span>
-                <span class="download-symbol">⬇</span>
+                <span class="download-symbol">↓</span>
               </a>
             </div>
           </div>
@@ -113,15 +116,82 @@
         </div>
       </div>
     </section>
+
+    <!-- POPUP MODAL / SLIDE-OVER FORM -->
+    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 style="color:#ffffff !important; margin:0;">Submit Patent &amp; Tech Transfer Application</h3>
+            <p style="color:#a7f3d0 !important; margin:0.2rem 0 0 0;">Direct application to Technology Transfer &amp; Patent Unit</p>
+          </div>
+          <button @click="showModal = false" class="modal-close-btn">✕</button>
+        </div>
+
+        <form @submit.prevent="handleSubmission" class="sub-form">
+          <div v-if="submitSuccess" class="alert-success">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:6px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Thank you! Your application and documents have been submitted successfully to TTPU!
+          </div>
+          <div v-if="submitError" class="alert-error">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:6px; vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> {{ submitError }}
+          </div>
+          
+          <div class="form-row-2">
+            <div class="input-group">
+              <label>Full Name / Proponent *</label>
+              <input v-model="subForm.sender_name" required type="text" placeholder="e.g. Dr. Juan Dela Cruz" />
+            </div>
+            <div class="input-group">
+              <label>Email Address *</label>
+              <input v-model="subForm.email" required type="email" placeholder="e.g. proponent@minsu.edu.ph" />
+            </div>
+          </div>
+          
+          <div class="form-row-2">
+            <div class="input-group">
+              <label>Contact Number</label>
+              <input v-model="subForm.phone" type="text" placeholder="e.g. +63 912 345 6789" />
+            </div>
+            <div class="input-group">
+              <label>Request Type Dropdown *</label>
+              <select v-model="subForm.subject" required>
+                <option value="Patent & IP Filing Guidance">Patent &amp; IP Filing Guidance</option>
+                <option value="Technology Licensing Inquiry">Technology Licensing Inquiry</option>
+                <option value="Spin-off Valuation Request">Spin-off Valuation Request</option>
+                <option value="Material Transfer Agreement (MTA)">Material Transfer Agreement (MTA)</option>
+                <option value="General Tech Transfer Inquiry">General Tech Transfer Inquiry</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Inquiry / Proposal Details *</label>
+            <textarea v-model="subForm.message" required rows="3" placeholder="Provide details about your invention, technology disclosure, or assistance needed..."></textarea>
+          </div>
+
+          <div class="input-group">
+            <label>Attach Disclosure File / Document (PDF, DOCX, ZIP, Max 10MB)</label>
+            <input type="file" @change="handleFileUpload" class="file-input" accept=".pdf,.doc,.docx,.zip,.jpg,.png" />
+          </div>
+
+          <div class="modal-footer-btns">
+            <button type="button" @click="showModal = false" class="btn-cancel">Cancel</button>
+            <button type="submit" :disabled="isSubmitting" class="btn-submit">
+              {{ isSubmitting ? 'Submitting...' : 'Send Application & Documents' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import { ttpuNews, ttpuForms, ttpuFunctions } from "@/data/siteData";
+import { submissionService } from "@/services/submissionService";
 
 const newsStartIndex = ref(0);
-
 const currentNews = computed(() => ttpuNews[newsStartIndex.value]);
 
 const nextNews = () => {
@@ -130,6 +200,55 @@ const nextNews = () => {
 
 const prevNews = () => {
   newsStartIndex.value = (newsStartIndex.value - 1 + ttpuNews.length) % ttpuNews.length;
+};
+
+// Interactive Form State
+const showModal = ref(false);
+const subForm = ref({
+  sender_name: "",
+  email: "",
+  phone: "",
+  subject: "Patent & IP Filing Guidance",
+  message: "",
+});
+const selectedFile = ref(null);
+const isSubmitting = ref(false);
+const submitSuccess = ref(false);
+const submitError = ref("");
+
+const handleFileUpload = (e) => {
+  if (e.target.files && e.target.files[0]) {
+    selectedFile.value = e.target.files[0];
+  }
+};
+
+const handleSubmission = async () => {
+  isSubmitting.value = true;
+  submitSuccess.value = false;
+  submitError.value = "";
+
+  try {
+    const fd = new FormData();
+    fd.append("target_unit", "tech-transfer");
+    fd.append("sender_name", subForm.value.sender_name);
+    fd.append("email", subForm.value.email);
+    fd.append("phone", subForm.value.phone);
+    fd.append("subject", subForm.value.subject);
+    fd.append("message", subForm.value.message);
+    if (selectedFile.value) {
+      fd.append("attachment", selectedFile.value);
+    }
+
+    await submissionService.submit(fd);
+    submitSuccess.value = true;
+    subForm.value = { sender_name: "", email: "", phone: "", subject: "Patent & IP Filing Guidance", message: "" };
+    selectedFile.value = null;
+    setTimeout(() => { showModal.value = false; submitSuccess.value = false; }, 2500);
+  } catch (err) {
+    submitError.value = err.response?.data?.message || "Failed to submit request. Please try again.";
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
@@ -179,11 +298,31 @@ const prevNews = () => {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 750px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.8rem;
+  gap: 1rem;
+}
+
+.btn-hero-action {
+  background: #ffffff;
+  color: #053018;
+  border: none;
+  padding: 0.9rem 2.2rem;
+  border-radius: 999px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.btn-hero-action:hover {
+  transform: translateY(-3px);
+  background: #f8fafc;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 
 .hero-tag {
@@ -559,6 +698,41 @@ const prevNews = () => {
   transform: translateX(-10px);
 }
 
+/* MODAL POPUP STYLING */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1.5rem; box-sizing: border-box;
+}
+
+.modal-card {
+  background: #ffffff; width: 100%; max-width: 650px; border-radius: 28px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: popIn 0.3s ease; max-height: 90vh; overflow-y: auto;
+}
+
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+.modal-header {
+  background: linear-gradient(135deg, #053018, #094A25); color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; }
+.modal-header p { margin: 0.2rem 0 0 0; font-size: 0.85rem; color: #a7f3d0; }
+.modal-close-btn { background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.sub-form { padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.alert-success { background: #dcfce7; color: #166534; padding: 1rem; border-radius: 12px; font-weight: 700; }
+.alert-error { background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 12px; font-weight: 700; }
+
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.input-group label { font-weight: 700; font-size: 0.85rem; color: #334155; }
+.input-group input, .input-group select, .input-group textarea {
+  width: 100%; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.95rem; outline: none; box-sizing: border-box;
+}
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: #094A25; box-shadow: 0 0 0 3px rgba(9, 74, 37, 0.12); }
+.file-input { background: #f8fafc; padding: 0.5rem !important; }
+
+.modal-footer-btns { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
+.btn-cancel { background: #f1f5f9; color: #475569; border: none; padding: 0.8rem 1.5rem; border-radius: 999px; font-weight: 700; cursor: pointer; }
+.btn-submit { background: #094A25; color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 999px; font-family: 'Outfit', sans-serif; font-weight: 800; cursor: pointer; }
+
 /* Responsive Styles */
 @media (max-width: 1024px) {
   .tt-dashboard-grid {
@@ -570,6 +744,9 @@ const prevNews = () => {
 @media (max-width: 768px) {
   .tt-hero {
     padding: 3rem 1.75rem;
+  }
+  .form-row-2 {
+    grid-template-columns: 1fr;
   }
 }
 </style>

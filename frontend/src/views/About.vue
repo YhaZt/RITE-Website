@@ -20,7 +20,7 @@
         <div class="mv-card mission-card">
           <div class="card-glow"></div>
           <div class="card-icon-header">
-            <span class="card-emoji">🎯</span>
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#10b981" stroke-width="2" fill="none" class="card-svg"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
             <h3>Our Mission</h3>
           </div>
           <p class="card-text">{{ aboutContent.mission }}</p>
@@ -30,7 +30,7 @@
         <div class="mv-card vision-card">
           <div class="card-glow"></div>
           <div class="card-icon-header">
-            <span class="card-emoji">👁️</span>
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="#10b981" stroke-width="2" fill="none" class="card-svg"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             <h3>Our Vision</h3>
           </div>
           <p class="card-text">{{ aboutContent.vision }}</p>
@@ -81,7 +81,7 @@
       <!-- Search & Filter Controls -->
       <div class="dashboard-controls">
         <div class="search-input-wrapper">
-          <span class="search-icon">🔍</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#94a3b8" stroke-width="2" fill="none" class="search-svg"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input
             v-model="searchQuery"
             type="text"
@@ -108,7 +108,7 @@
       <div class="partners-results-container">
         <transition-group name="grid-fade" tag="div" class="partners-grid">
           <div
-            v-for="partner in filteredPartners"
+            v-for="partner in paginatedPartners"
             :key="partner.name"
             class="partner-card"
           >
@@ -137,6 +137,13 @@
           </div>
         </transition-group>
 
+        <!-- Pagination Controls -->
+        <div v-if="totalPages > 1" class="pagination-bar">
+          <button :disabled="currentPage === 1" @click="currentPage--" class="page-btn">← Prev</button>
+          <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ filteredPartners.length }} items)</span>
+          <button :disabled="currentPage === totalPages" @click="currentPage++" class="page-btn">Next →</button>
+        </div>
+
         <!-- No Results Fallback -->
         <div v-if="filteredPartners.length === 0" class="no-results-panel">
           <span class="no-results-icon">📂</span>
@@ -150,13 +157,34 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { aboutContent, ecosystemPartners } from "@/data/siteData";
+import { ref, computed, onMounted } from "vue";
+import { aboutContent, ecosystemPartners as staticPartners } from "@/data/siteData";
+import { ecosystemService } from "@/services/ecosystemService";
 import OrganizationalChart from "@/components/OrganizationalChart.vue";
 
 const searchQuery = ref("");
 const activeCategory = ref("all");
 const failedLogos = ref({});
+const dynamicPartners = ref(staticPartners);
+
+const currentPage = ref(1);
+const itemsPerPage = ref(12);
+
+onMounted(async () => {
+  try {
+    const apiPartners = await ecosystemService.getAll();
+    if (apiPartners && apiPartners.length > 0) {
+      dynamicPartners.value = apiPartners.map(p => ({
+        name: p.title,
+        link: p.link,
+        logo: p.image || '',
+        category: p.category || 'all'
+      }));
+    }
+  } catch (e) {
+    console.warn("Using static ecosystem fallback", e);
+  }
+});
 
 const categories = [
   { label: "All Partners", value: "all" },
@@ -190,7 +218,7 @@ const getInitials = (name) => {
 };
 
 const filteredPartners = computed(() => {
-  return ecosystemPartners.filter((partner) => {
+  return dynamicPartners.value.filter((partner) => {
     // 1. Filter by search query
     const matchesSearch = partner.name.toLowerCase().includes(searchQuery.value.toLowerCase());
     
@@ -210,9 +238,17 @@ const filteredPartners = computed(() => {
   });
 });
 
+const totalPages = computed(() => Math.ceil(filteredPartners.value.length / itemsPerPage.value) || 1);
+
+const paginatedPartners = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return filteredPartners.value.slice(start, start + itemsPerPage.value);
+});
+
 const resetFilters = () => {
   searchQuery.value = "";
   activeCategory.value = "all";
+  currentPage.value = 1;
 };
 
 const getLogoBoxStyle = (partner) => {
@@ -537,13 +573,13 @@ const getImageStyle = (partner) => {
   max-width: 600px;
 }
 
-.search-icon {
+.search-svg {
   position: absolute;
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1rem;
-  opacity: 0.6;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .search-field {
@@ -733,6 +769,52 @@ const getImageStyle = (partner) => {
   border-color: #094A25;
 }
 
+/* Pagination Styles */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.page-btn {
+  background: #094A25;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #063219;
+  transform: translateY(-1px);
+}
+
+.page-btn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.page-info {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+}
+
 /* Grid animations */
 .grid-fade-enter-active,
 .grid-fade-leave-active {
@@ -755,6 +837,10 @@ const getImageStyle = (partner) => {
   }
   .about-hero {
     padding: 3rem 1.75rem;
+  }
+  .pagination-bar {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 </style>

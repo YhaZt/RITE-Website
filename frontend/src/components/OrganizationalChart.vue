@@ -7,13 +7,13 @@
       <!-- Chart Hierarchy Container -->
       <div class="chart-tree">
         <!-- Root node: VP -->
-        <div class="tree-level level-root">
+        <div class="tree-level level-root" v-if="topLeader">
           <div class="node-wrapper main-leader">
             <div class="node-card gold-border">
-              <div class="node-avatar text-gold">VP</div>
+              <div class="node-avatar text-gold">{{ getInitials(topLeader.name) }}</div>
               <div class="node-info">
-                <h4>Vice President for Research, Innovation, Technology &amp; Extension</h4>
-                <p class="node-role">Executive Leadership</p>
+                <h4>{{ topLeader.name }}</h4>
+                <p class="node-role">{{ topLeader.title }}</p>
               </div>
             </div>
           </div>
@@ -21,21 +21,20 @@
         </div>
 
         <!-- Level 2: Directors & Managers -->
-        <div class="tree-level level-leaders">
+        <div class="tree-level level-leaders" v-if="execLeaders.length > 0">
           <div class="leaders-row">
-            <div class="node-card border-green">
-              <div class="node-avatar text-green">LM</div>
-              <div class="node-info">
-                <h4>Leonel C. Mendoza</h4>
-                <p class="node-role">OIC Vice President - RDE</p>
+            <div
+              v-for="(exec, idx) in execLeaders"
+              :key="exec.id || idx"
+              class="node-card"
+              :class="idx % 2 === 0 ? 'border-green' : 'border-purple'"
+            >
+              <div class="node-avatar" :class="idx % 2 === 0 ? 'text-green' : 'text-purple'">
+                {{ getInitials(exec.name) }}
               </div>
-            </div>
-            
-            <div class="node-card border-purple">
-              <div class="node-avatar text-purple">RJ</div>
               <div class="node-info">
-                <h4>Engr. Randy A. Joco</h4>
-                <p class="node-role">TBI Manager</p>
+                <h4>{{ exec.name }}</h4>
+                <p class="node-role">{{ exec.title }}</p>
               </div>
             </div>
           </div>
@@ -49,15 +48,7 @@
             <div class="division-column green-group">
               <h4 class="division-title">Research &amp; Publication</h4>
               <div class="nodes-list">
-                <div v-for="item in researchSide" :key="item.name" class="node-card compact">
-                  <div class="node-avatar-sm">{{ getInitials(item.name) }}</div>
-                  <div class="node-info">
-                    <h5>{{ item.name }}</h5>
-                    <p class="node-role">{{ item.title }}</p>
-                  </div>
-                </div>
-
-                <div v-for="item in researchNodes" :key="item.name" class="node-card compact highlight">
+                <div v-for="item in researchItems" :key="item.id || item.name" class="node-card compact highlight">
                   <div class="node-avatar-sm fill-green">{{ getInitials(item.name) }}</div>
                   <div class="node-info">
                     <h5>{{ item.name }}</h5>
@@ -71,11 +62,11 @@
             <div class="division-column gold-group">
               <h4 class="division-title">Research Centers</h4>
               <div class="nodes-list">
-                <div class="node-card center-highlight">
-                  <div class="node-avatar fill-gold">RC</div>
+                <div v-for="item in centerItems" :key="item.id || item.name" class="node-card center-highlight">
+                  <div class="node-avatar fill-gold">{{ getInitials(item.name) }}</div>
                   <div class="node-info">
-                    <h4>Highly Specialized Research Centers</h4>
-                    <p class="node-role">Directorate</p>
+                    <h4>{{ item.name }}</h4>
+                    <p class="node-role">{{ item.title }}</p>
                   </div>
                 </div>
               </div>
@@ -85,15 +76,7 @@
             <div class="division-column purple-group">
               <h4 class="division-title">Extension Division</h4>
               <div class="nodes-list">
-                <div v-for="item in extensionSide" :key="item.name" class="node-card compact">
-                  <div class="node-avatar-sm">{{ getInitials(item.name) }}</div>
-                  <div class="node-info">
-                    <h5>{{ item.name }}</h5>
-                    <p class="node-role">{{ item.title }}</p>
-                  </div>
-                </div>
-
-                <div v-for="item in extensionNodes" :key="item.name" class="node-card compact highlight">
+                <div v-for="item in extensionItems" :key="item.id || item.name" class="node-card compact highlight">
                   <div class="node-avatar-sm fill-purple">{{ getInitials(item.name) }}</div>
                   <div class="node-info">
                     <h5>{{ item.name }}</h5>
@@ -110,32 +93,68 @@
 </template>
 
 <script setup>
-const researchSide = [
-  { name: "University Researcher V", title: "Research Support" },
-  { name: "University Researcher IV", title: "Research Support" },
-  { name: "Campus Research Coordinator", title: "Research Support" },
+import { ref, computed, onMounted } from "vue";
+import { orgService } from "@/services/orgService";
+
+const defaultMembers = [
+  { id: 1, name: "Vice President for Research, Innovation, Technology & Extension", title: "Executive Leadership", division: "Executive Leadership", role_type: "executive_top" },
+  { id: 2, name: "Leonel C. Mendoza", title: "OIC Vice President - RDE", division: "Executive Leadership", role_type: "executive" },
+  { id: 3, name: "Engr. Randy A. Joco", title: "TBI Manager", division: "Executive Leadership", role_type: "executive" },
+  
+  { id: 4, name: "University Researcher V", title: "Research Support", division: "Research & Publication" },
+  { id: 5, name: "University Researcher IV", title: "Research Support", division: "Research & Publication" },
+  { id: 6, name: "Campus Research Coordinator", title: "Research Support", division: "Research & Publication" },
+  { id: 7, name: "Leonel C. Mendoza", title: "OIC Vice President - RDE", division: "Research & Publication" },
+  { id: 8, name: "Engr. Randy A. Joco", title: "TBI Manager", division: "Research & Publication" },
+  { id: 9, name: "University Researcher V", title: "Research Support Specialist", division: "Research & Publication" },
+  { id: 10, name: "Technology Transfer and Patent Unit", title: "Research Office Head", division: "Research & Publication" },
+  { id: 11, name: "Publication and Printing Unit", title: "Research Office Head", division: "Research & Publication" },
+
+  { id: 12, name: "Highly Specialized Research Centers", title: "Directorate", division: "Research Centers" },
+
+  { id: 13, name: "University Extension Specialist V", title: "Extension Support", division: "Extension Division" },
+  { id: 14, name: "University Extension Specialist IV", title: "Extension Support", division: "Extension Division" },
+  { id: 15, name: "Campus Extension Coordinator", title: "Extension Support", division: "Extension Division" },
+  { id: 16, name: "Extension Unit", title: "Extension Office", division: "Extension Division" },
+  { id: 17, name: "Monitoring & Impact Assessment Unit", title: "Extension Office", division: "Extension Division" },
 ];
 
-const researchNodes = [
-  { name: "Technology Transfer and Patent Unit", title: "Research Office" },
-  { name: "Publication and Printing Unit", title: "Research Office" },
-  { name: "Research Unit", title: "Research Office" },
-  { name: "Director, Innovation", title: "Research Office" },
-  { name: "Director, Research Ethics and Integrity", title: "Research Office" },
-];
+const allMembers = ref(defaultMembers);
 
-const extensionSide = [
-  { name: "University Extension Specialist V", title: "Extension Support" },
-  { name: "University Extension Specialist IV", title: "Extension Support" },
-  { name: "Campus Extension Coordinator", title: "Extension Support" },
-];
+onMounted(async () => {
+  try {
+    const apiMembers = await orgService.getAll();
+    if (apiMembers && apiMembers.length > 0) {
+      allMembers.value = apiMembers;
+    }
+  } catch (e) {
+    console.warn("Using static org members fallback", e);
+  }
+});
 
-const extensionNodes = [
-  { name: "Extension Unit", title: "Extension Office" },
-  { name: "Monitoring & Impact Assessment Unit", title: "Extension Office" },
-];
+const topLeader = computed(() => {
+  return allMembers.value.find(m => m.role_type === 'executive_top' || m.division === 'Executive Leadership' && m.title.includes('Leadership')) || allMembers.value[0];
+});
+
+const execLeaders = computed(() => {
+  return allMembers.value.filter(m => m.division === 'Executive Leadership' && m.id !== topLeader.value?.id && m.role_type !== 'executive_top');
+});
+
+const researchItems = computed(() => {
+  return allMembers.value.filter(m => m.division === 'Research & Publication' || m.division === 'Research and Publication Division');
+});
+
+const centerItems = computed(() => {
+  const items = allMembers.value.filter(m => m.division === 'Research Centers' || m.division === 'Highly Specialized Research Centers');
+  return items.length > 0 ? items : [{ id: 'rc', name: 'Highly Specialized Research Centers', title: 'Directorate' }];
+});
+
+const extensionItems = computed(() => {
+  return allMembers.value.filter(m => m.division === 'Extension Division' || m.division === 'Extension');
+});
 
 const getInitials = (name) => {
+  if (!name) return "R";
   return name
     .split(" ")
     .filter(Boolean)

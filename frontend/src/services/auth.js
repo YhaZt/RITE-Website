@@ -1,20 +1,20 @@
 import { http, csrf } from "@/api/http";
 
 export async function getUser() {
-  const res = await http.get("/api/user");
+  const res = await http.get("/user");
   return res.data;
 }
 
 export async function login({ email, password, remember }) {
   await csrf();
-  await http.post("/login", { email, password, remember });
-  return getUser();
+  const res = await http.post("/login", { email, password, remember });
+  return res.data?.user || getUser();
 }
 
 export async function register({ name, email, password, password_confirmation }) {
   await csrf();
-  await http.post("/register", { name, email, password, password_confirmation });
-  return getUser();
+  const res = await http.post("/register", { name, email, password, password_confirmation });
+  return res.data?.user || getUser();
 }
 
 export async function logout() {
@@ -34,7 +34,7 @@ export async function resetPassword({ email, token, password, password_confirmat
 
 export async function changePassword({ current_password, password, password_confirmation }) {
   await csrf();
-  await http.post("/api/user/password", { current_password, password, password_confirmation });
+  await http.post("/user/password", { current_password, password, password_confirmation });
 }
 
 export function isValidationError(error) {

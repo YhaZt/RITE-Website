@@ -78,7 +78,7 @@ const handleSubmit = async () => {
   submitting.value = true;
   try {
     await login(form.value);
-    router.push("/");
+    router.push("/admin");
   } catch (err) {
     console.error("Login failed:", err);
   } finally {

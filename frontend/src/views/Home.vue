@@ -38,7 +38,7 @@
             </div>
             <!-- Absolute Floating Status Box -->
             <div class="floating-badge-box">
-              <span class="floating-icon">🌱</span>
+              <svg class="badge-svg-icon" viewBox="0 0 24 24" width="22" height="22" stroke="#10b981" stroke-width="2" fill="none"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 4.4-3.6 8-8 8Z"></path><path d="M11 20v-9"></path></svg>
               <div>
                 <h4>RITE Innovation</h4>
                 <p>Ecosystem driven</p>
@@ -152,18 +152,25 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { homeCarouselSlides, homeFeatureCards, homePageOverviews, homeNewsItems } from "@/data/siteData";
+import { homeCarouselSlides as staticSlides, homeFeatureCards, homePageOverviews, homeNewsItems as staticNews } from "@/data/siteData";
+import { carouselService } from "@/services/carouselService";
+import { newsService } from "@/services/newsService";
+
+const homeCarouselSlides = ref(staticSlides);
+const homeNewsItems = ref(staticNews);
 
 // Hero Image Carousel Slider
 const currentHeroIndex = ref(0);
 let heroInterval = null;
 
 const nextHero = () => {
-  currentHeroIndex.value = (currentHeroIndex.value + 1) % homeCarouselSlides.length;
+  if (homeCarouselSlides.value.length === 0) return;
+  currentHeroIndex.value = (currentHeroIndex.value + 1) % homeCarouselSlides.value.length;
 };
 
 const prevHero = () => {
-  currentHeroIndex.value = (currentHeroIndex.value - 1 + homeCarouselSlides.length) % homeCarouselSlides.length;
+  if (homeCarouselSlides.value.length === 0) return;
+  currentHeroIndex.value = (currentHeroIndex.value - 1 + homeCarouselSlides.value.length) % homeCarouselSlides.value.length;
 };
 
 // Spotlight Tab System
@@ -184,7 +191,26 @@ const resetSpotlightInterval = () => {
   }, 9000);
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch dynamic data from Laravel Backend API
+  try {
+    const slidesData = await carouselService.getAll();
+    if (slidesData && slidesData.length > 0) {
+      homeCarouselSlides.value = slidesData;
+    }
+  } catch (e) {
+    console.warn("Using static carousel slides fallback", e);
+  }
+
+  try {
+    const newsData = await newsService.getAll();
+    if (newsData && newsData.length > 0) {
+      homeNewsItems.value = newsData;
+    }
+  } catch (e) {
+    console.warn("Using static news fallback", e);
+  }
+
   // Start Hero Auto Slider
   heroInterval = setInterval(nextHero, 6000);
   // Start Spotlight Auto Slider
@@ -405,18 +431,19 @@ onUnmounted(() => {
 
 .floating-badge-box {
   position: absolute;
-  left: -2rem;
-  bottom: 2rem;
-  background: rgba(255, 255, 255, 0.85);
+  left: 1.5rem;
+  bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 16px;
-  padding: 0.8rem 1.25rem;
+  padding: 0.75rem 1.2rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
   z-index: 5;
+  max-width: 85%;
 }
 
 .floating-icon {

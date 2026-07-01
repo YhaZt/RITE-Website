@@ -107,16 +107,21 @@ const routes = [
     name: "Contact",
     component: () => import("../views/Contact.vue"),
   },
-  // Backward compatibility redirects for old React paths
-  { path: "/mindoro-development", redirect: "/centers/mindoro-development" },
-  { path: "/digital-innovation", redirect: "/centers/digital-innovation" },
-  { path: "/environmental-studies", redirect: "/centers/environmental-studies" },
-  { path: "/fisheries-research", redirect: "/centers/fisheries-research" },
-  { path: "/mimaropa-food", redirect: "/centers/mimaropa-food" },
-  { path: "/island-education", redirect: "/centers/island-education" },
-  { path: "/peace-criminology", redirect: "/centers/peace-criminology" },
-  { path: "/smart-agriculture", redirect: "/centers/smart-agriculture" },
-  { path: "/textile-fiber", redirect: "/centers/textile-fiber" },
+  {
+    path: "/admin",
+    name: "AdminDashboard",
+    component: () => import("../views/AdminDashboard.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/404",
+    name: "NotFound",
+    component: () => import("../views/NotFound.vue"),
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
+  },
 ];
 
 const router = createRouter({
@@ -131,14 +136,13 @@ const router = createRouter({
   },
 });
 
-// Senior Dev style navigation guards
 router.beforeEach((to, from, next) => {
   const { user } = useAuth();
 
   if (to.meta.requiresAuth && !user.value) {
     next({ name: "Login" });
   } else if (to.meta.requiresGuest && user.value) {
-    next({ name: "Home" });
+    next({ name: "AdminDashboard" });
   } else {
     next();
   }

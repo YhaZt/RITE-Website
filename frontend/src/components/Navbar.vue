@@ -89,10 +89,20 @@
             </transition>
           </li>
 
-          <!-- Auth Actions -->
-          <li v-if="user" class="auth-btn-group">
-            <router-link to="/change-password" class="nav-item-link" active-class="active-route">Change Password</router-link>
-            <button @click="handleLogout" class="action-btn logout-btn">Logout</button>
+          <!-- Auth Actions Dropdown/Button -->
+          <li v-if="user" class="dropdown-item" @mouseenter="openDropdown('user')" @mouseleave="closeDropdown('user')">
+            <button class="dropdown-trigger user-trigger">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="user-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Admin
+              <span class="arrow-icon">▾</span>
+            </button>
+            <transition name="dropdown-fade">
+              <ul v-show="activeDropdown === 'user'" class="dropdown-panel user-dropdown-panel">
+                <li><router-link to="/admin" class="dropdown-link" @click="closeAll">Dashboard</router-link></li>
+                <li><router-link to="/change-password" class="dropdown-link" @click="closeAll">Change Password</router-link></li>
+                <li class="divider"></li>
+                <li><button @click="handleLogout" class="dropdown-link logout-dropdown-btn">Logout</button></li>
+              </ul>
+            </transition>
           </li>
           <li v-else class="auth-btn-group">
             <router-link to="/login" class="action-btn login-btn">Login</router-link>
@@ -108,96 +118,98 @@
       </button>
     </div>
 
-    <!-- Mobile Drawer Overlay -->
-    <transition name="fade">
-      <div v-if="mobileMenuOpen" class="drawer-overlay" @click="closeAll"></div>
-    </transition>
+    <!-- Mobile Drawer Overlay & Menu Teleported to Body -->
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="mobileMenuOpen" class="drawer-overlay" @click="closeAll"></div>
+      </transition>
 
-    <!-- Mobile Drawer Menu -->
-    <transition name="slide-drawer">
-      <aside v-if="mobileMenuOpen" class="mobile-drawer">
-        <div class="drawer-header">
-          <img :src="riteLogo" alt="RITE Logo" class="drawer-logo" />
-          <button class="close-drawer-btn" @click="closeAll" aria-label="Close menu">✕</button>
-        </div>
+      <transition name="slide-drawer">
+        <aside v-if="mobileMenuOpen" class="mobile-drawer">
+          <div class="drawer-header">
+            <img :src="riteLogo" alt="RITE Logo" class="drawer-logo" />
+            <button class="close-drawer-btn" @click="closeAll" aria-label="Close menu">✕</button>
+          </div>
 
-        <nav class="mobile-nav">
-          <ul class="mobile-links-list">
-            <li>
-              <router-link to="/" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Home</router-link>
-            </li>
-            <li>
-              <router-link to="/about" class="mobile-nav-link" active-class="active-mob" @click="closeAll">About</router-link>
-            </li>
+          <nav class="mobile-nav">
+            <ul class="mobile-links-list">
+              <li>
+                <router-link to="/" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Home</router-link>
+              </li>
+              <li>
+                <router-link to="/about" class="mobile-nav-link" active-class="active-mob" @click="closeAll">About</router-link>
+              </li>
 
-            <!-- Mobile Accordion: Research & Publication -->
-            <li class="mobile-accordion-item">
-              <button class="accordion-trigger" @click="toggleAccordion('research')">
-                Research &amp; Publication
-                <span class="accordion-caret" :class="{ rotated: mobileAccordions.research }">▼</span>
-              </button>
-              <ul v-show="mobileAccordions.research" class="accordion-menu">
-                <li><router-link to="/research" class="accordion-link font-semibold" @click="closeAll">Overview &amp; Services →</router-link></li>
-                <li><router-link to="/publication-and-printing" class="accordion-link" @click="closeAll">Publication &amp; Printing Unit</router-link></li>
-                <li><router-link to="/research-unit" class="accordion-link" @click="closeAll">Research Unit</router-link></li>
-              </ul>
-            </li>
+              <!-- Mobile Accordion: Research & Publication -->
+              <li class="mobile-accordion-item">
+                <button class="accordion-trigger" @click="toggleAccordion('research')">
+                  Research &amp; Publication
+                  <span class="accordion-caret" :class="{ rotated: mobileAccordions.research }">▼</span>
+                </button>
+                <ul v-show="mobileAccordions.research" class="accordion-menu">
+                  <li><router-link to="/research" class="accordion-link font-semibold" @click="closeAll">Overview &amp; Services →</router-link></li>
+                  <li><router-link to="/publication-and-printing" class="accordion-link" @click="closeAll">Publication &amp; Printing Unit</router-link></li>
+                  <li><router-link to="/research-unit" class="accordion-link" @click="closeAll">Research Unit</router-link></li>
+                </ul>
+              </li>
 
-            <!-- Mobile Accordion: Innovation -->
-            <li class="mobile-accordion-item">
-              <button class="accordion-trigger" @click="toggleAccordion('innovation')">
-                Innovation
-                <span class="accordion-caret" :class="{ rotated: mobileAccordions.innovation }">▼</span>
-              </button>
-              <ul v-show="mobileAccordions.innovation" class="accordion-menu">
-                <li><router-link to="/innovation" class="accordion-link font-semibold" @click="closeAll">Overview &amp; Pillars →</router-link></li>
-                <li><router-link to="/technology-transfer" class="accordion-link" @click="closeAll">Tech Transfer &amp; Patents</router-link></li>
-                <li><a href="https://www.minsuibibes.com" target="_blank" rel="noopener noreferrer" class="accordion-link" @click="closeAll">Minsu I-BIBES</a></li>
-                <li><router-link to="/innovation-hub" class="accordion-link font-semibold" @click="closeAll">Innovation Hub</router-link></li>
-                <li><router-link to="/bakodhub" class="accordion-link sub-nested-link" @click="closeAll">BUKID Hub</router-link></li>
-                <li><router-link to="/project-mauya" class="accordion-link sub-nested-link" @click="closeAll">Project MAUYA</router-link></li>
-              </ul>
-            </li>
+              <!-- Mobile Accordion: Innovation -->
+              <li class="mobile-accordion-item">
+                <button class="accordion-trigger" @click="toggleAccordion('innovation')">
+                  Innovation
+                  <span class="accordion-caret" :class="{ rotated: mobileAccordions.innovation }">▼</span>
+                </button>
+                <ul v-show="mobileAccordions.innovation" class="accordion-menu">
+                  <li><router-link to="/innovation" class="accordion-link font-semibold" @click="closeAll">Overview &amp; Pillars →</router-link></li>
+                  <li><router-link to="/technology-transfer" class="accordion-link" @click="closeAll">Tech Transfer &amp; Patents</router-link></li>
+                  <li><a href="https://www.minsuibibes.com" target="_blank" rel="noopener noreferrer" class="accordion-link" @click="closeAll">Minsu I-BIBES</a></li>
+                  <li><router-link to="/innovation-hub" class="accordion-link font-semibold" @click="closeAll">Innovation Hub</router-link></li>
+                  <li><router-link to="/bukid-hub" class="accordion-link sub-nested-link" @click="closeAll">BUKID Hub</router-link></li>
+                  <li><router-link to="/project-mauya" class="accordion-link sub-nested-link" @click="closeAll">Project MAUYA</router-link></li>
+                </ul>
+              </li>
 
-            <li>
-              <router-link to="/ethics" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Research Ethics</router-link>
-            </li>
-            <li>
-              <router-link to="/extension" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Extension</router-link>
-            </li>
+              <li>
+                <router-link to="/ethics" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Research Ethics</router-link>
+              </li>
+              <li>
+                <router-link to="/extension" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Extension</router-link>
+              </li>
 
-            <!-- Mobile Accordion: Research Centers -->
-            <li class="mobile-accordion-item">
-              <button class="accordion-trigger" @click="toggleAccordion('centers')">
-                Research Centers
-                <span class="accordion-caret" :class="{ rotated: mobileAccordions.centers }">▼</span>
-              </button>
-              <ul v-show="mobileAccordions.centers" class="accordion-menu">
-                <li><router-link to="/centers" class="accordion-link font-semibold" @click="closeAll">All Research Centers →</router-link></li>
-                <li><router-link to="/centers/mindoro-development" class="accordion-link" @click="closeAll">Mindoro Development &amp; Studies</router-link></li>
-                <li><router-link to="/centers/digital-innovation" class="accordion-link" @click="closeAll">Digital Innovation &amp; Emerging Tech</router-link></li>
-                <li><router-link to="/centers/environmental-studies" class="accordion-link" @click="closeAll">Environmental Studies</router-link></li>
-                <li><router-link to="/centers/fisheries-research" class="accordion-link" @click="closeAll">Fisheries Research</router-link></li>
-                <li><router-link to="/centers/mimaropa-food" class="accordion-link" @click="closeAll">MIMAROPA Food Innovation</router-link></li>
-                <li><router-link to="/centers/island-education" class="accordion-link" @click="closeAll">Island Education &amp; Sustainability</router-link></li>
-                <li><router-link to="/centers/peace-criminology" class="accordion-link" @click="closeAll">Peace, Criminology &amp; Law</router-link></li>
-                <li><router-link to="/centers/smart-agriculture" class="accordion-link" @click="closeAll">Smart Agriculture &amp; Biosystems</router-link></li>
-                <li><router-link to="/centers/textile-fiber" class="accordion-link" @click="closeAll">Natural Textile Fiber Innovation</router-link></li>
-              </ul>
-            </li>
+              <!-- Mobile Accordion: Research Centers -->
+              <li class="mobile-accordion-item">
+                <button class="accordion-trigger" @click="toggleAccordion('centers')">
+                  Research Centers
+                  <span class="accordion-caret" :class="{ rotated: mobileAccordions.centers }">▼</span>
+                </button>
+                <ul v-show="mobileAccordions.centers" class="accordion-menu">
+                  <li><router-link to="/centers" class="accordion-link font-semibold" @click="closeAll">All Research Centers →</router-link></li>
+                  <li><router-link to="/centers/mindoro-development" class="accordion-link" @click="closeAll">Mindoro Development &amp; Studies</router-link></li>
+                  <li><router-link to="/centers/digital-innovation" class="accordion-link" @click="closeAll">Digital Innovation &amp; Emerging Tech</router-link></li>
+                  <li><router-link to="/centers/environmental-studies" class="accordion-link" @click="closeAll">Environmental Studies</router-link></li>
+                  <li><router-link to="/centers/fisheries-research" class="accordion-link" @click="closeAll">Fisheries Research</router-link></li>
+                  <li><router-link to="/centers/mimaropa-food" class="accordion-link" @click="closeAll">MIMAROPA Food Innovation</router-link></li>
+                  <li><router-link to="/centers/island-education" class="accordion-link" @click="closeAll">Island Education &amp; Sustainability</router-link></li>
+                  <li><router-link to="/centers/peace-criminology" class="accordion-link" @click="closeAll">Peace, Criminology &amp; Law</router-link></li>
+                  <li><router-link to="/centers/smart-agriculture" class="accordion-link" @click="closeAll">Smart Agriculture &amp; Biosystems</router-link></li>
+                  <li><router-link to="/centers/textile-fiber" class="accordion-link" @click="closeAll">Natural Textile Fiber Innovation</router-link></li>
+                </ul>
+              </li>
 
-            <!-- Mobile Auth Actions -->
-            <li class="mobile-auth-section" v-if="user">
-              <router-link to="/change-password" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Change Password</router-link>
-              <button @click="handleLogout" class="mobile-action-btn logout-mob-btn">Logout</button>
-            </li>
-            <li class="mobile-auth-section" v-else>
-              <router-link to="/login" class="mobile-action-btn login-mob-btn" @click="closeAll">Login</router-link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-    </transition>
+              <!-- Mobile Auth Actions -->
+              <li class="mobile-auth-section" v-if="user">
+                <router-link to="/admin" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Admin Dashboard</router-link>
+                <router-link to="/change-password" class="mobile-nav-link" active-class="active-mob" @click="closeAll">Change Password</router-link>
+                <button @click="handleLogout" class="mobile-action-btn logout-mob-btn">Logout</button>
+              </li>
+              <li class="mobile-auth-section" v-else>
+                <router-link to="/login" class="mobile-action-btn login-mob-btn" @click="closeAll">Login</router-link>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+      </transition>
+    </Teleport>
   </header>
 </template>
 
@@ -276,22 +288,27 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .navbar-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid rgba(9, 74, 37, 0.08);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
   height: 80px;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .navbar-container {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
@@ -302,10 +319,11 @@ onUnmounted(() => {
 .logo-link {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .logo-image {
-  height: 60px;
+  height: 54px;
   width: auto;
   object-fit: contain;
   transition: transform 0.2s ease;
@@ -323,20 +341,21 @@ onUnmounted(() => {
 .nav-links-list {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-item-link {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
   text-decoration: none;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 8px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .nav-item-link:hover,
@@ -356,12 +375,12 @@ onUnmounted(() => {
 }
 
 .dropdown-trigger {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
   background: transparent;
   border: none;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -370,6 +389,13 @@ onUnmounted(() => {
   font-family: inherit;
   transition: all 0.2s ease;
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.user-trigger {
+  background: rgba(9, 74, 37, 0.06);
+  color: #094A25;
+  font-weight: 700;
 }
 
 .arrow-icon {
@@ -390,15 +416,21 @@ onUnmounted(() => {
   border: 1px solid rgba(9, 74, 37, 0.08);
   border-radius: 12px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  min-width: 250px;
-  padding: 0.6rem;
+  min-width: 240px;
+  padding: 0.5rem;
   margin-top: 0.5rem;
   list-style: none;
   z-index: 110;
 }
 
 .centers-dropdown-panel {
-  min-width: 290px;
+  min-width: 280px;
+}
+
+.user-dropdown-panel {
+  right: 0;
+  left: auto;
+  min-width: 200px;
 }
 
 .dropdown-link {
@@ -407,37 +439,51 @@ onUnmounted(() => {
   border-radius: 8px;
   color: #4b5563;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .dropdown-link:hover {
   background: rgba(16, 185, 129, 0.08);
   color: #094A25;
-  padding-left: 1.2rem;
+}
+
+.logout-dropdown-btn {
+  color: #dc2626;
+}
+.logout-dropdown-btn:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.4rem 0;
 }
 
 .sub-link {
-  padding-left: 1.8rem;
+  padding-left: 1.6rem;
   font-size: 0.85rem;
   color: #6b7280;
-}
-
-.sub-link:hover {
-  padding-left: 2rem;
 }
 
 .auth-btn-group {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  margin-left: 0.5rem;
 }
 
 .action-btn {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  padding: 0.5rem 1.25rem;
+  padding: 0.45rem 1.2rem;
   border-radius: 999px;
   cursor: pointer;
   border: none;
@@ -456,23 +502,13 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-.logout-btn {
-  background: rgba(220, 38, 38, 0.08);
-  color: #dc2626;
-}
-
-.logout-btn:hover {
-  background: #dc2626;
-  color: white;
-}
-
-/* Hamburger Styles */
+/* Hamburger Button */
 .hamburger-btn {
   display: none;
   flex-direction: column;
   justify-content: space-between;
-  width: 24px;
-  height: 18px;
+  width: 28px;
+  height: 20px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -482,9 +518,9 @@ onUnmounted(() => {
 
 .hamburger-line {
   width: 100%;
-  height: 2px;
+  height: 3px;
   background-color: #094A25;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: all 0.3s ease;
 }
 
@@ -492,9 +528,9 @@ onUnmounted(() => {
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 105;
+  z-index: 9998;
 }
 
 .mobile-drawer {
@@ -502,11 +538,12 @@ onUnmounted(() => {
   top: 0;
   right: 0;
   bottom: 0;
-  width: 300px;
+  width: 320px;
+  max-width: 85vw;
   background: #ffffff;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
   padding: 1.5rem;
-  z-index: 115;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -516,20 +553,34 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: transparent;
 }
 
 .drawer-logo {
-  height: 48px;
+  height: 44px;
   width: auto;
 }
 
 .close-drawer-btn {
-  background: transparent;
+  background: #f1f5f9;
   border: none;
-  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.1rem;
   color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-drawer-btn:hover {
+  background: #e2e8f0;
 }
 
 .mobile-nav {
@@ -542,7 +593,7 @@ onUnmounted(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .mobile-nav-link,
@@ -553,7 +604,7 @@ onUnmounted(() => {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #374151;
   text-decoration: none;
@@ -593,13 +644,12 @@ onUnmounted(() => {
 
 .accordion-menu {
   list-style: none;
-  padding: 0.25rem 0 0.5rem 1.25rem;
-  margin: 0;
+  padding: 0.25rem 0 0.5rem 1rem;
+  margin: 0 0 0 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  border-left: 2px solid rgba(9, 74, 37, 0.08);
-  margin-left: 1.5rem;
+  border-left: 2px solid rgba(9, 74, 37, 0.1);
 }
 
 .accordion-link {
@@ -607,7 +657,7 @@ onUnmounted(() => {
   padding: 0.5rem 0.75rem;
   color: #4b5563;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.15s ease;
@@ -619,8 +669,8 @@ onUnmounted(() => {
 }
 
 .sub-nested-link {
-  padding-left: 1.5rem;
-  font-size: 0.85rem;
+  padding-left: 1.25rem;
+  font-size: 0.82rem;
   color: #6b7280;
 }
 
@@ -685,7 +735,7 @@ onUnmounted(() => {
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
   .desktop-nav {
     display: none;
   }
@@ -693,7 +743,7 @@ onUnmounted(() => {
     display: flex;
   }
   .logo-image {
-    height: 52px;
+    height: 48px;
   }
   .navbar-header {
     height: 72px;

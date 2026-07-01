@@ -47,21 +47,44 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { centerService } from "@/services/centerService";
 
 const hoveredIndex = ref(null);
 
-const centers = [
-  { title: "Mindoro Development and Studies Center", desc: "Researching socio-economic, environmental, and cultural developments in the Mindoro region.", img: "/development.png", link: "/centers/mindoro-development", icon: "🌴" },
-  { title: "Center for Digital Innovation, Cybersecurity & Emerging Technologies", desc: "Advancing digital transformation, cryptography, and emerging computing networks.", img: "/digital.png", link: "/centers/digital-innovation", icon: "💻" },
-  { title: "Center for Environmental Studies", desc: "Dedicated to local biodiversity conservation, sustainability, and ecosystem protection.", img: "/environmental.png", link: "/centers/environmental-studies", icon: "🌲" },
-  { title: "Fisheries Research and Development Center", desc: "Advancing marine science, aquaculture, and sustainable coastal fishing technologies.", img: "/fisheries.png", link: "/centers/fisheries-research", icon: "🐟" },
-  { title: "MIMAROPA Food Innovation Center", desc: "Focusing on regional nutrition, food safety, and post-harvest agricultural innovations.", img: "/food.png", link: "/centers/mimaropa-food", icon: "🍲" },
-  { title: "Center for Island Education and Sustainability", desc: "Specialized educational research regarding unique island geographies and ecologies.", img: "/island.png", link: "/centers/island-education", icon: "🏫" },
-  { title: "Center for Peace, Criminology, and Law Enforcement Studies", desc: "Socio-political research into regional conflict resolution, security, and crime reduction models.", img: "/centers/peace-criminology", icon: "⚖️" },
-  { title: "Center for Smart Agriculture and Biosystems Innovation", desc: "Integrating smart IoT sensors, automation, and AI robotics into farming systems.", img: "/smart.png", link: "/centers/smart-agriculture", icon: "🚜" },
-  { title: "Natural Textile Fiber Innovation Center", desc: "Pioneering natural fiber extraction, textile processing, and sustainable garment engineering.", img: "/textile.png", link: "/centers/textile-fiber", icon: "🧶" },
+const staticCenters = [
+  { title: "Mindoro Development and Studies Center", desc: "Researching socio-economic, environmental, and cultural developments in the Mindoro region.", img: "/development.png", link: "/centers/mindoro-development", icon: "•" },
+  { title: "Center for Digital Innovation, Cybersecurity & Emerging Technologies", desc: "Advancing digital transformation, cryptography, and emerging computing networks.", img: "/digital.png", link: "/centers/digital-innovation", icon: "•" },
+  { title: "Center for Environmental Studies", desc: "Dedicated to local biodiversity conservation, sustainability, and ecosystem protection.", img: "/environmental.png", link: "/centers/environmental-studies", icon: "•" },
+  { title: "Fisheries Research and Development Center", desc: "Advancing marine science, aquaculture, and sustainable coastal fishing technologies.", img: "/fisheries.png", link: "/centers/fisheries-research", icon: "•" },
+  { title: "MIMAROPA Food Innovation Center", desc: "Focusing on regional nutrition, food safety, and post-harvest agricultural innovations.", img: "/food.png", link: "/centers/mimaropa-food", icon: "•" },
+  { title: "Center for Island Education and Sustainability", desc: "Specialized educational research regarding unique island geographies and ecologies.", img: "/island.png", link: "/centers/island-education", icon: "•" },
+  { title: "Center for Peace, Criminology, and Law Enforcement Studies", desc: "Socio-political research into regional conflict resolution, security, and crime reduction models.", img: "/peace.png", link: "/centers/peace-criminology", icon: "•" },
+  { title: "Center for Smart Agriculture and Biosystems Innovation", desc: "Integrating smart IoT sensors, automation, and AI robotics into farming systems.", img: "/smart.png", link: "/centers/smart-agriculture", icon: "•" },
+  { title: "Natural Textile Fiber Innovation Center", desc: "Pioneering natural fiber extraction, textile processing, and sustainable garment engineering.", img: "/textile.png", link: "/centers/textile-fiber", icon: "•" },
 ];
+
+const centers = ref(staticCenters);
+
+onMounted(async () => {
+  try {
+    const apiCenters = await centerService.getAll();
+    if (apiCenters && apiCenters.length > 0) {
+      centers.value = apiCenters.map(c => {
+        const match = staticCenters.find(s => s.link.includes(c.slug));
+        return {
+          title: c.name,
+          desc: c.description || '',
+          img: c.image || (match ? match.img : '/development.png'),
+          link: `/centers/${c.slug}`,
+          icon: '•'
+        };
+      });
+    }
+  } catch (e) {
+    console.warn("Using static centers fallback", e);
+  }
+});
 </script>
 
 <style scoped>
