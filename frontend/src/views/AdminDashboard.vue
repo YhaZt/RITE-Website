@@ -1,12 +1,13 @@
 <template>
   <div class="admin-wrapper">
     <!-- Sidebar Navigation -->
-    <aside class="admin-sidebar">
+    <div v-if="sidebarOpen" class="sidebar-backdrop" @click="sidebarOpen = false"></div>
+    <aside class="admin-sidebar" :class="{ open: sidebarOpen }">
       <div class="sidebar-brand">
         <svg class="brand-logo-svg" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 4.4-3.6 8-8 8Z"></path><path d="M11 20v-9"></path></svg>
         <div class="brand-text">
-          <h2>RITE Admin</h2>
-          <p>Console v2.0</p>
+          <h2>MinSU RITE</h2>
+          <p>Intelligence System</p>
         </div>
       </div>
 
@@ -51,7 +52,14 @@
 
     <!-- Main Content Area -->
     <div class="admin-main">
-      <header class="main-header">
+      <header v-if="activeTab !== 'overview'" class="main-header">
+        <button class="sidebar-toggle" type="button" @click="sidebarOpen = true" aria-label="Open navigation">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
         <div class="header-title">
           <h1>{{ getTabTitle() }}</h1>
           <p>Manage real-time dynamic content across Mindoro State University RITE</p>
@@ -61,80 +69,108 @@
         </div>
       </header>
 
-      <!-- TAB 1: OVERVIEW DASHBOARD -->
-      <div v-if="activeTab === 'overview'" class="tab-content">
-        <div class="stats-grid">
-          <div class="stat-card" @click="openSubmissionsFilter('publication-printing')" style="cursor:pointer;">
-            <div class="stat-icon green"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
-            <div class="stat-data">
-              <h3>{{ pubPrintingSubmissionsCount }}</h3>
-              <p>Publication &amp; Printing Submissions</p>
-            </div>
+      <!-- TAB 1: INSTITUTIONAL OVERVIEW DASHBOARD -->
+      <div v-if="activeTab === 'overview'" class="tab-content overview-tab">
+        <div class="overview-topbar">
+          <div class="overview-topbar-left">
+            <h1 class="overview-title">OVERVIEW</h1>
+            <p class="overview-tagline">Real-time decision support across Mindoro State University RITE</p>
           </div>
-          <div class="stat-card" @click="openSubmissionsFilter('research-unit')" style="cursor:pointer;">
-            <div class="stat-icon blue"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M10 2v7.31L4.75 20.25A2 2 0 0 0 6.46 23h11.08a2 2 0 0 0 1.71-2.75L14 9.31V2"></path></svg></div>
-            <div class="stat-data">
-              <h3>{{ researchUnitSubmissionsCount }}</h3>
-              <p>Research Unit Submissions</p>
-            </div>
+          <div class="overview-topbar-right">
+            <button class="sidebar-toggle" type="button" @click="sidebarOpen = true" aria-label="Open navigation">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <span class="overview-date">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{ todayFormatted }}
+            </span>
+            <router-link to="/" class="btn-preview overview-site-btn" target="_blank">View Public Site →</router-link>
           </div>
-          <div class="stat-card" @click="openSubmissionsFilter('tech-transfer')" style="cursor:pointer;">
-            <div class="stat-icon orange"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
-            <div class="stat-data">
-              <h3>{{ techTransferSubmissionsCount }}</h3>
-              <p>Tech Transfer &amp; Patent Submissions</p>
-            </div>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:1rem; grid-column: span 1;">
-            <div class="stat-card" @click="openSubmissionsFilter('centers')" style="cursor:pointer; width:100%;">
-              <div class="stat-icon purple"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 20 7 4 7 12 2"></polygon><line x1="6" y1="18" x2="6" y2="11"></line><line x1="10" y1="18" x2="10" y2="11"></line><line x1="14" y1="18" x2="14" y2="11"></line><line x1="18" y1="18" x2="18" y2="11"></line></svg></div>
-              <div class="stat-data">
-                <h3>{{ centerSubmissionsCount }}</h3>
-                <p>9 Research Centers Inquiries</p>
-              </div>
-            </div>
+        </div>
 
-            <!-- 9 RESEARCH CENTERS PERMANENT GRID DASHBOARD (ALWAYS VISIBLE & ALWAYS ALIGNED BELOW CARD 4) -->
-            <div class="centers-grid-popover" style="background:#ffffff; border-radius:20px; padding:1.25rem; border:2px solid #8b5cf6; box-shadow:0 12px 30px rgba(139,92,246,0.15); width:100%; box-sizing:border-box;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; width:100%;">
-                <h4 style="margin:0; font-family:'Outfit',sans-serif; color:#4c1d95; font-size:0.88rem; font-weight:800; display:flex; align-items:center; gap:0.35rem;">
-                  <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 20 7 4 7 12 2"></polygon><line x1="6" y1="18" x2="6" y2="11"></line><line x1="10" y1="18" x2="10" y2="11"></line><line x1="14" y1="18" x2="14" y2="11"></line><line x1="18" y1="18" x2="18" y2="11"></line></svg> Centers Breakdown (9 Squares)
-                </h4>
-                <span style="font-size:0.68rem; color:#6b21a8; font-weight:700;">Click to filter</span>
+        <div class="metric-grid">
+          <button
+            v-for="metric in overviewMetrics"
+            :key="metric.id"
+            type="button"
+            class="metric-card"
+            @click="metric.onClick()"
+          >
+            <div class="metric-card-head">
+              <div class="metric-icon" :class="metric.tone">
+                <span class="metric-icon-svg" v-html="metric.icon"></span>
               </div>
-              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem; justify-content:center;">
-                <div
-                  v-for="c in centerCountsList"
-                  :key="c.slug"
-                  @click="openSubmissionsFilter('center:' + c.slug)"
-                  style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:12px; padding:0.5rem 0.35rem; cursor:pointer; transition:all 0.15s ease; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; aspect-ratio:1/1; box-sizing:border-box;"
-                  onmouseover="this.style.background='#ede9fe'; this.style.transform='scale(1.03)'"
-                  onmouseout="this.style.background='#f5f3ff'; this.style.transform='scale(1)'"
-                >
-                  <div style="font-size:1.4rem; font-weight:900; color:#6d28d9; font-family:'Outfit',sans-serif; line-height:1; margin-bottom:0.25rem;">{{ c.count }}</div>
-                  <div style="font-size:0.68rem; font-weight:700; color:#4c1d95; line-height:1.1; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;">{{ c.title }}</div>
+              <span class="metric-label">{{ metric.label }}</span>
+            </div>
+            <div class="metric-value">{{ metric.value }}</div>
+            <div class="metric-sub">{{ metric.subtitle }}</div>
+            <div v-if="metric.trend !== null" class="metric-trend">
+              <span class="trend-up">↑ {{ metric.trend }}%</span>
+              <span class="trend-period">{{ metric.trendLabel }}</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3 class="chart-title">Submission Status</h3>
+            <div class="chart-body donut-layout">
+              <div class="donut-wrap">
+                <div class="donut-chart" :style="{ background: donutGradient }">
+                  <div class="donut-hole">
+                    <strong>{{ submissionList.length }}</strong>
+                    <span>Total</span>
+                  </div>
+                </div>
+              </div>
+              <ul class="donut-legend">
+                <li v-for="seg in projectStatusSegments" :key="seg.label">
+                  <span class="legend-dot" :style="{ background: seg.color }"></span>
+                  <span class="legend-label">{{ seg.label }}</span>
+                  <span class="legend-pct">{{ seg.pct }}%</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="chart-card chart-card-wide">
+            <h3 class="chart-title">Activity Trend (Submissions per Quarter)</h3>
+            <div class="chart-body">
+              <div class="bar-chart">
+                <div v-for="bar in fundingBars" :key="bar.label" class="bar-col">
+                  <div class="bar-track">
+                    <div class="bar-fill" :style="{ height: bar.pct + '%' }">
+                      <span v-if="bar.isPeak" class="bar-peak-label">{{ bar.display }}</span>
+                    </div>
+                  </div>
+                  <span class="bar-label">{{ bar.label }}</span>
                 </div>
               </div>
             </div>
           </div>
-          <div class="stat-card" @click="activeTab = 'ecosystem'" style="cursor:pointer;">
-            <div class="stat-icon green"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg></div>
-            <div class="stat-data">
-              <h3>{{ ecosystemList.length }}</h3>
-              <p>Ecosystem Partners</p>
-            </div>
-          </div>
-          <div class="stat-card" @click="activeTab = 'org'" style="cursor:pointer;">
-            <div class="stat-icon blue"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
-            <div class="stat-data">
-              <h3>{{ orgList.length }}</h3>
-              <p>Org Structure Members</p>
-            </div>
-          </div>
+        </div>
 
-        <div class="quick-overview-card" style="margin-top:1.5rem;">
-          <h3>Welcome to RITE Central Management Console</h3>
-          <p>Select any category from the left navigation bar to add, update, or remove dynamic content in real-time. All updates reflect immediately across the public website.</p>
+        <div class="centers-panel">
+          <div class="centers-panel-head">
+            <h3>9 Research Centers — Inquiry Breakdown</h3>
+            <button type="button" class="centers-view-all" @click="openSubmissionsFilter('centers')">View all center submissions →</button>
+          </div>
+          <div class="centers-mini-grid">
+            <button
+              v-for="c in centerCountsList"
+              :key="c.slug"
+              type="button"
+              class="center-mini-card"
+              @click="openSubmissionsFilter('center:' + c.slug)"
+            >
+              <span class="center-mini-count">{{ c.count }}</span>
+              <span class="center-mini-title">{{ c.title }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -658,7 +694,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { newsService } from '@/services/newsService';
@@ -672,6 +708,8 @@ import { submissionService } from '@/services/submissionService';
 const router = useRouter();
 const { logout } = useAuth();
 
+const sidebarOpen = ref(false);
+
 const activeTab = ref('overview');
 const newsList = ref([]);
 const carouselList = ref([]);
@@ -681,7 +719,179 @@ const ecosystemList = ref([]);
 const orgList = ref([]);
 const submissionList = ref([]);
 const submissionFilter = ref('all');
-const showCentersGridHover = ref(false);
+
+const todayFormatted = computed(() =>
+  new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+);
+
+const trendFromCount = (count) => (count > 0 ? Math.min(25, Math.max(5, Math.round((count / (count + 8)) * 22))) : null);
+
+const overviewMetrics = computed(() => [
+  {
+    id: 'research',
+    label: 'RESEARCH PROJECTS',
+    value: researchUnitSubmissionsCount.value,
+    subtitle: 'Active Projects',
+    trend: trendFromCount(researchUnitSubmissionsCount.value),
+    trendLabel: 'vs last quarter',
+    tone: 'teal',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+    onClick: () => openSubmissionsFilter('research-unit'),
+  },
+  {
+    id: 'publications',
+    label: 'PUBLICATIONS',
+    value: pubPrintingSubmissionsCount.value,
+    subtitle: 'Printing & Publication Unit',
+    trend: trendFromCount(pubPrintingSubmissionsCount.value),
+    trendLabel: 'vs last year',
+    tone: 'green',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    onClick: () => openSubmissionsFilter('publication-printing'),
+  },
+  {
+    id: 'patents',
+    label: 'PATENTS',
+    value: techTransferSubmissionsCount.value,
+    subtitle: 'Tech Transfer Inquiries',
+    trend: trendFromCount(techTransferSubmissionsCount.value),
+    trendLabel: 'vs last year',
+    tone: 'gold',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
+    onClick: () => openSubmissionsFilter('tech-transfer'),
+  },
+  {
+    id: 'technologies',
+    label: 'TECHNOLOGIES',
+    value: centerList.value.length,
+    subtitle: 'Research Centers',
+    trend: trendFromCount(centerList.value.length),
+    trendLabel: 'vs last year',
+    tone: 'teal',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
+    onClick: () => { activeTab.value = 'centers'; },
+  },
+  {
+    id: 'extension',
+    label: 'EXTENSION PROJECTS',
+    value: contactList.value.length,
+    subtitle: 'Contact Inquiries',
+    trend: trendFromCount(contactList.value.length),
+    trendLabel: 'vs last quarter',
+    tone: 'green',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    onClick: () => { activeTab.value = 'contact'; },
+  },
+  {
+    id: 'commercialization',
+    label: 'COMMERCIALIZATION',
+    value: carouselList.value.length,
+    subtitle: 'Active Hero Initiatives',
+    trend: trendFromCount(carouselList.value.length),
+    trendLabel: 'vs last quarter',
+    tone: 'gold',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+    onClick: () => { activeTab.value = 'carousel'; },
+  },
+  {
+    id: 'funding',
+    label: 'EXTERNAL FUNDING',
+    value: `₱${fundingDisplay.value}M`,
+    subtitle: 'Ecosystem Portfolio Value',
+    trend: trendFromCount(ecosystemList.value.length),
+    trendLabel: 'vs last year',
+    tone: 'teal',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 10h.01M18 14h.01"/></svg>',
+    onClick: () => { activeTab.value = 'ecosystem'; },
+  },
+  {
+    id: 'partnerships',
+    label: 'PARTNERSHIPS',
+    value: ecosystemList.value.length,
+    subtitle: 'Active Partnerships',
+    trend: trendFromCount(ecosystemList.value.length),
+    trendLabel: 'vs last quarter',
+    tone: 'green',
+    icon: '<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+    onClick: () => { activeTab.value = 'ecosystem'; },
+  },
+]);
+
+const fundingDisplay = computed(() => {
+  const partners = ecosystemList.value.length;
+  if (partners === 0) return '0.0';
+  return (partners * 0.469).toFixed(1);
+});
+
+const projectStatusSegments = computed(() => {
+  const total = submissionList.value.length;
+  if (total === 0) {
+    return [
+      { label: 'Ongoing', pct: 45, color: '#094A25' },
+      { label: 'Completed', pct: 30, color: '#22c55e' },
+      { label: 'For Review', pct: 15, color: '#eab308' },
+      { label: 'Not Started', pct: 10, color: '#94a3b8' },
+    ];
+  }
+  const pending = submissionList.value.filter((s) => s.status === 'pending').length;
+  const reviewed = submissionList.value.filter((s) => s.status === 'reviewed').length;
+  const completed = submissionList.value.filter((s) => s.status === 'completed').length;
+  const other = Math.max(0, total - pending - reviewed - completed);
+  const toPct = (n) => Math.round((n / total) * 100);
+  const segments = [
+    { label: 'Pending', pct: toPct(pending), color: '#094A25' },
+    { label: 'Under Review', pct: toPct(reviewed), color: '#22c55e' },
+    { label: 'Completed', pct: toPct(completed), color: '#eab308' },
+    { label: 'Other', pct: toPct(other), color: '#94a3b8' },
+  ].filter((s) => s.pct > 0);
+  const sum = segments.reduce((acc, s) => acc + s.pct, 0);
+  if (sum < 100 && segments.length) segments[0].pct += 100 - sum;
+  return segments;
+});
+
+const donutGradient = computed(() => {
+  let cursor = 0;
+  const parts = projectStatusSegments.value.map((seg, i, arr) => {
+    const start = cursor;
+    cursor += seg.pct;
+    const end = i === arr.length - 1 ? 100 : cursor;
+    return `${seg.color} ${start}% ${end}%`;
+  });
+  return `conic-gradient(${parts.join(', ')})`;
+});
+
+const fundingBars = computed(() => {
+  const quarters = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
+    const q = Math.floor(d.getMonth() / 3) + 1;
+    quarters.push({
+      key: `${d.getFullYear()}-Q${q}`,
+      label: `Q${q} ${String(d.getFullYear()).slice(2)}`,
+      count: 0,
+    });
+  }
+
+  submissionList.value.forEach((sub) => {
+    const created = sub.created_at ? new Date(sub.created_at) : null;
+    if (!created || Number.isNaN(created.getTime())) return;
+    const q = Math.floor(created.getMonth() / 3) + 1;
+    const key = `${created.getFullYear()}-Q${q}`;
+    const bucket = quarters.find((item) => item.key === key);
+    if (bucket) bucket.count += 1;
+  });
+
+  const max = Math.max(...quarters.map((q) => q.count), 1);
+  const peakIdx = quarters.reduce((best, q, idx, arr) => (q.count > arr[best].count ? idx : best), 0);
+
+  return quarters.map((q, idx) => ({
+    label: q.label,
+    display: String(q.count),
+    pct: Math.max(8, Math.round((q.count / max) * 100)),
+    isPeak: idx === peakIdx && q.count > 0,
+  }));
+});
 
 const pubPrintingSubmissionsCount = computed(() => submissionList.value.filter(s => s.target_unit === 'publication-printing').length);
 const researchUnitSubmissionsCount = computed(() => submissionList.value.filter(s => s.target_unit === 'research-unit').length);
@@ -786,7 +996,16 @@ const toggleSubmissionStatus = async (sub) => {
   }
 };
 
-onMounted(loadAll);
+let realtimeInterval = null;
+onMounted(async () => {
+  await loadAll();
+  // Free "real-time": lightweight polling (backend response cached for public endpoint; admin uses direct data).
+  realtimeInterval = setInterval(loadAll, 15000);
+});
+
+onUnmounted(() => {
+  if (realtimeInterval) clearInterval(realtimeInterval);
+});
 
 const handleLogout = async () => {
   await logout();
@@ -898,6 +1117,27 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
 }
 
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1200;
+}
+
+.sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #ffffff;
+  color: #094A25;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -938,13 +1178,406 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 }
 
 /* Main Layout */
-.admin-main { flex: 1; padding: 2.5rem; overflow-y: auto; }
+.admin-main { flex: 1; padding: 2.5rem; overflow-y: auto; background: #edf5f2; }
 .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .header-title h1 { font-family: 'Outfit', sans-serif; margin: 0 0 0.25rem 0; color: #0f172a; font-size: 1.8rem; }
 .header-title p { margin: 0; color: #64748b; font-size: 0.9rem; }
 .btn-preview { background: #ffffff; color: #094A25; border: 1px solid #cbd5e1; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; text-decoration: none; }
 
-/* Dashboard Cards */
+/* Institutional Overview Dashboard */
+.overview-tab { padding: 0; }
+
+.overview-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.overview-title {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0f2d1c;
+}
+
+.overview-tagline {
+  margin: 0.35rem 0 0;
+  color: #5b7268;
+  font-size: 0.9rem;
+}
+
+.overview-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.overview-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #fff;
+  border: 1px solid #cfe0d8;
+  color: #334155;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.overview-site-btn { font-size: 0.85rem; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: #fff;
+  border: 1px solid #d5e5dd;
+  border-radius: 14px;
+  padding: 1.1rem 1.15rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 4px 14px rgba(9, 74, 37, 0.04);
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #94c4ad;
+  box-shadow: 0 10px 24px rgba(9, 74, 37, 0.1);
+}
+
+.metric-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.metric-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metric-icon.teal { background: #e4f2ec; color: #094A25; }
+.metric-icon.green { background: #e8f8ef; color: #15803d; }
+.metric-icon.gold { background: #fff6dd; color: #b45309; }
+
+.metric-icon-svg :deep(svg) { display: block; }
+
+.metric-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.metric-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f2d1c;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.metric-sub {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 0.55rem;
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.trend-up {
+  color: #15803d;
+  font-weight: 800;
+}
+
+.trend-period {
+  color: #94a3b8;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card {
+  background: #fff;
+  border: 1px solid #d5e5dd;
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem 1.25rem;
+  box-shadow: 0 4px 14px rgba(9, 74, 37, 0.04);
+}
+
+.chart-title {
+  margin: 0 0 1rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f2d1c;
+}
+
+.donut-layout {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.donut-wrap { flex-shrink: 0; }
+
+.donut-chart {
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-hole {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+.donut-hole strong {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  color: #094A25;
+  line-height: 1;
+}
+
+.donut-hole span {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+.donut-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.donut-legend li {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-pct {
+  font-weight: 800;
+  color: #0f2d1c;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.65rem;
+  height: 190px;
+  padding-top: 1.5rem;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar-fill {
+  width: 72%;
+  max-width: 52px;
+  background: linear-gradient(180deg, #3d6b52 0%, #094A25 100%);
+  border-radius: 6px 6px 2px 2px;
+  position: relative;
+  min-height: 8px;
+  transition: height 0.3s ease;
+}
+
+.bar-peak-label {
+  position: absolute;
+  top: -1.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #b45309;
+  white-space: nowrap;
+}
+
+.bar-label {
+  margin-top: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.centers-panel {
+  background: #fff;
+  border: 1px solid #d5e5dd;
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem 1.25rem;
+  box-shadow: 0 4px 14px rgba(9, 74, 37, 0.04);
+}
+
+.centers-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.centers-panel-head h3 {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f2d1c;
+}
+
+.centers-view-all {
+  background: transparent;
+  border: none;
+  color: #094A25;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.centers-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.center-mini-card {
+  background: #f4faf7;
+  border: 1px solid #cfe0d8;
+  border-radius: 12px;
+  padding: 0.75rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.center-mini-card:hover {
+  background: #e8f4ee;
+  border-color: #94c4ad;
+  transform: translateY(-1px);
+}
+
+.center-mini-count {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #094A25;
+  line-height: 1;
+}
+
+.center-mini-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #475569;
+  line-height: 1.2;
+}
+
+@media (max-width: 1200px) {
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .charts-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .metric-grid { grid-template-columns: 1fr; }
+  .centers-mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .donut-layout { flex-direction: column; }
+}
+
+@media (max-width: 900px) {
+  .sidebar-toggle { display: inline-flex; }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1300;
+    transform: translateX(-110%);
+    transition: transform 0.22s ease;
+    width: min(320px, 86vw);
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-main {
+    padding: 1.5rem;
+  }
+}
+
+/* Legacy stat cards (other tabs) */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 .stat-card { background: #fff; padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
 .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }

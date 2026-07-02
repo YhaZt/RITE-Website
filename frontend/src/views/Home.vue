@@ -2,46 +2,123 @@
   <main class="page-container">
     <!-- Split Hero Section -->
     <section class="hero-section">
-      <div class="hero-grid">
-        <div class="hero-left">
-          <span class="hero-badge">Mindoro State University</span>
-          <h1 class="hero-title">
-            Research, Innovation &amp; Technology Extension
-          </h1>
-          <p class="hero-description">
-            Advancing regional knowledge, fostering community-driven solutions, and driving technology commercialization for inclusive sustainable growth.
-          </p>
-          <div class="hero-actions">
-            <router-link to="/about" class="btn btn-primary">Discover Our Mission</router-link>
-            <router-link to="/centers" class="btn btn-secondary">Explore Research Centers</router-link>
+      <div class="hero-inner">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <span class="hero-badge">Mindoro State University</span>
+            <h1 class="hero-title">
+              Research, Innovation &amp; Technology Extension
+            </h1>
+            <p class="hero-description">
+              Advancing regional knowledge, fostering community-driven solutions, and driving technology commercialization for inclusive sustainable growth.
+            </p>
+            <div class="hero-actions">
+              <router-link to="/about" class="btn btn-primary">Discover Our Mission</router-link>
+              <router-link to="/centers" class="btn btn-secondary">Explore Research Centers</router-link>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div class="hero-image-showcase">
+              <div class="showcase-card shadow-lg">
+                <transition name="fade-slide" mode="out-in">
+                  <div :key="currentHeroIndex" class="showcase-slide" :style="{ backgroundImage: `url(${homeCarouselSlides[currentHeroIndex].image})` }">
+                    <div class="slide-overlay"></div>
+                    <div class="slide-content">
+                      <span class="slide-category">Key Focus</span>
+                      <h3>{{ homeCarouselSlides[currentHeroIndex].title }}</h3>
+                      <p>{{ homeCarouselSlides[currentHeroIndex].description }}</p>
+                    </div>
+                  </div>
+                </transition>
+                <div class="showcase-controls">
+                  <button @click="prevHero" class="control-btn" aria-label="Previous slide">‹</button>
+                  <button @click="nextHero" class="control-btn" aria-label="Next slide">›</button>
+                </div>
+              </div>
+              <div class="floating-badge-box">
+                <svg class="badge-svg-icon" viewBox="0 0 24 24" width="22" height="22" stroke="#10b981" stroke-width="2" fill="none"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 4.4-3.6 8-8 8Z"></path><path d="M11 20v-9"></path></svg>
+                <div>
+                  <h4>RITE Innovation</h4>
+                  <p>Ecosystem driven</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="hero-right">
-          <div class="hero-image-showcase">
-            <div class="showcase-card shadow-lg">
-              <transition name="fade-slide" mode="out-in">
-                <div :key="currentHeroIndex" class="showcase-slide" :style="{ backgroundImage: `url(${homeCarouselSlides[currentHeroIndex].image})` }">
-                  <div class="slide-overlay"></div>
-                  <div class="slide-content">
-                    <span class="slide-category">Key Focus</span>
-                    <h3>{{ homeCarouselSlides[currentHeroIndex].title }}</h3>
-                    <p>{{ homeCarouselSlides[currentHeroIndex].description }}</p>
-                  </div>
-                </div>
-              </transition>
-              <!-- Carousel Controls -->
-              <div class="showcase-controls">
-                <button @click="prevHero" class="control-btn" aria-label="Previous slide">‹</button>
-                <button @click="nextHero" class="control-btn" aria-label="Next slide">›</button>
+        <!-- Full-width public analytics strip -->
+        <div class="rite-pulse-panel" aria-live="polite">
+          <div class="rite-pulse-head">
+            <div>
+              <h3>RITE Pulse</h3>
+              <p>Public institutional metrics — safe to display, updated in near real-time</p>
+            </div>
+            <div class="rite-pulse-meta">
+              <span class="live-dot" aria-hidden="true"></span>
+              <span class="rite-pulse-updated">Updated {{ publicMetricsUpdatedLabel }}</span>
+            </div>
+          </div>
+
+          <div class="rite-pulse-stats">
+            <div v-for="stat in pulseStats" :key="stat.id" class="pulse-stat">
+              <span class="pulse-stat-label">{{ stat.label }}</span>
+              <strong class="pulse-stat-value">{{ stat.value }}</strong>
+            </div>
+          </div>
+
+          <div class="rite-pulse-charts">
+            <div class="pulse-chart-card pulse-chart-wide">
+              <div class="pulse-chart-head">
+                <h4>Inquiry Activity</h4>
+                <span>Last 14 days</span>
+              </div>
+              <svg class="pulse-svg" viewBox="0 0 360 100" preserveAspectRatio="none" role="img" aria-label="Inquiry activity line chart">
+                <polyline v-if="trendLinePoints" :points="trendLinePoints" fill="none" stroke="rgba(16,185,129,0.2)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+                <polyline v-if="trendLinePoints" :points="trendLinePoints" fill="none" stroke="#094A25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <div class="pulse-chart-foot">
+                <span>Total: {{ pmTotal }}</span>
+                <span>Avg/day: {{ pmAvg }}</span>
               </div>
             </div>
-            <!-- Absolute Floating Status Box -->
-            <div class="floating-badge-box">
-              <svg class="badge-svg-icon" viewBox="0 0 24 24" width="22" height="22" stroke="#10b981" stroke-width="2" fill="none"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 4.4-3.6 8-8 8Z"></path><path d="M11 20v-9"></path></svg>
-              <div>
-                <h4>RITE Innovation</h4>
-                <p>Ecosystem driven</p>
+
+            <div class="pulse-chart-card">
+              <div class="pulse-chart-head">
+                <h4>Inquiries by Unit</h4>
+                <span>All time</span>
+              </div>
+              <div class="pulse-bars">
+                <div v-for="bar in unitBars" :key="bar.label" class="pulse-bar-col">
+                  <div class="pulse-bar-track">
+                    <div class="pulse-bar-fill" :style="{ height: bar.pct + '%' }"></div>
+                  </div>
+                  <span class="pulse-bar-val">{{ bar.count }}</span>
+                  <span class="pulse-bar-label">{{ bar.shortLabel }}</span>
+                </div>
+                <p v-if="!unitBars.length" class="pulse-empty">No inquiry data yet</p>
+              </div>
+            </div>
+
+            <div class="pulse-chart-card">
+              <div class="pulse-chart-head">
+                <h4>{{ statusChartTitle }}</h4>
+                <span>Distribution</span>
+              </div>
+              <div class="pulse-donut-layout">
+                <div class="pulse-donut" :style="{ background: statusDonutGradient }">
+                  <div class="pulse-donut-hole">
+                    <strong>{{ statusDonutTotal }}</strong>
+                    <span>Total</span>
+                  </div>
+                </div>
+                <ul class="pulse-legend">
+                  <li v-for="seg in statusSegments" :key="seg.label">
+                    <span class="pulse-legend-dot" :style="{ background: seg.color }"></span>
+                    <span>{{ seg.label }}</span>
+                    <strong>{{ seg.count }}</strong>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -155,9 +232,14 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { homeCarouselSlides as staticSlides, homeFeatureCards, homePageOverviews, homeNewsItems as staticNews } from "@/data/siteData";
 import { carouselService } from "@/services/carouselService";
 import { newsService } from "@/services/newsService";
+import { publicMetricsService } from "@/services/publicMetricsService";
 
 const homeCarouselSlides = ref(staticSlides);
 const homeNewsItems = ref(staticNews);
+const publicMetrics = ref(null);
+const publicMetricsUpdatedAt = ref(null);
+
+let publicMetricsInterval = null;
 
 // Hero Image Carousel Slider
 const currentHeroIndex = ref(0);
@@ -215,11 +297,129 @@ onMounted(async () => {
   heroInterval = setInterval(nextHero, 6000);
   // Start Spotlight Auto Slider
   resetSpotlightInterval();
+
+  const loadPublicMetrics = async () => {
+    try {
+      const data = await publicMetricsService.get();
+      publicMetrics.value = data;
+      publicMetricsUpdatedAt.value = data?.generated_at ? new Date(data.generated_at) : new Date();
+    } catch (e) {
+      // Keep UI stable; public chart is non-critical
+      if (!publicMetricsUpdatedAt.value) publicMetricsUpdatedAt.value = new Date();
+    }
+  };
+
+  await loadPublicMetrics();
+  publicMetricsInterval = setInterval(loadPublicMetrics, 30000);
 });
 
 onUnmounted(() => {
   if (heroInterval) clearInterval(heroInterval);
   if (spotlightInterval) clearInterval(spotlightInterval);
+  if (publicMetricsInterval) clearInterval(publicMetricsInterval);
+});
+
+const publicMetricsUpdatedLabel = computed(() => {
+  if (!publicMetricsUpdatedAt.value) return "just now";
+  return publicMetricsUpdatedAt.value.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+});
+
+const pulseCounters = computed(() => {
+  const c = publicMetrics.value?.counters;
+  return {
+    research_centers: c?.research_centers ?? 9,
+    ecosystem_partners: c?.ecosystem_partners ?? 0,
+    news_items: c?.news_items ?? homeNewsItems.value.length,
+    carousel_slides: c?.carousel_slides ?? homeCarouselSlides.value.length,
+    total_inquiries: c?.total_inquiries ?? 0,
+  };
+});
+
+const pulseStats = computed(() => [
+  { id: "centers", label: "Research Centers", value: pulseCounters.value.research_centers },
+  { id: "partners", label: "Ecosystem Partners", value: pulseCounters.value.ecosystem_partners },
+  { id: "news", label: "News & Events", value: pulseCounters.value.news_items },
+  { id: "carousel", label: "Hero Initiatives", value: pulseCounters.value.carousel_slides },
+  { id: "inquiries", label: "Total Inquiries", value: pulseCounters.value.total_inquiries },
+]);
+
+const pmSeries = computed(() => publicMetrics.value?.series?.submissions_last_14_days || []);
+const pmTotal = computed(() => pmSeries.value.reduce((acc, p) => acc + (p.count || 0), 0));
+const pmAvg = computed(() => {
+  if (!pmSeries.value.length) return "0.0";
+  return (pmTotal.value / pmSeries.value.length).toFixed(1);
+});
+
+const buildLinePoints = (points, w = 360, h = 100) => {
+  if (!points || points.length < 2) return "";
+  const padX = 6;
+  const padY = 8;
+  const max = Math.max(...points.map((p) => p.count || 0), 1);
+  return points
+    .map((p, i) => {
+      const x = padX + (i * (w - padX * 2)) / (points.length - 1);
+      const y = h - padY - ((p.count || 0) * (h - padY * 2)) / max;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+};
+
+const trendLinePoints = computed(() => buildLinePoints(pmSeries.value));
+
+const unitBars = computed(() => {
+  const rows = publicMetrics.value?.breakdowns?.inquiries_by_unit || [];
+  const max = Math.max(...rows.map((r) => r.count), 1);
+  return rows.slice(0, 4).map((r) => ({
+    label: r.label,
+    shortLabel: r.label.replace("Publication & Printing", "Pub. & Print").replace("Research Centers", "Centers"),
+    count: r.count,
+    pct: Math.max(10, Math.round((r.count / max) * 100)),
+  }));
+});
+
+const STATUS_COLORS = { Pending: "#094A25", Reviewed: "#22c55e", Completed: "#eab308" };
+const ECOSYSTEM_COLORS = ["#094A25", "#22c55e", "#0ea5e9", "#eab308", "#8b5cf6"];
+
+const inquiryStatus = computed(() => publicMetrics.value?.breakdowns?.inquiry_status || []);
+const ecosystemCats = computed(() => publicMetrics.value?.breakdowns?.ecosystem_categories || []);
+
+const statusChartTitle = computed(() =>
+  inquiryStatus.value.some((s) => s.count > 0) ? "Inquiry Status" : "Partner Categories"
+);
+
+const statusSegments = computed(() => {
+  const source = inquiryStatus.value.some((s) => s.count > 0)
+    ? inquiryStatus.value
+    : ecosystemCats.value;
+
+  if (!source.length) {
+    return [
+      { label: "Partners", count: pulseCounters.value.ecosystem_partners, color: "#094A25", pct: 100 },
+    ];
+  }
+
+  const total = source.reduce((acc, s) => acc + s.count, 0) || 1;
+  return source.map((s, i) => ({
+    label: s.label,
+    count: s.count,
+    color: STATUS_COLORS[s.label] || ECOSYSTEM_COLORS[i % ECOSYSTEM_COLORS.length],
+    pct: Math.round((s.count / total) * 100),
+  }));
+});
+
+const statusDonutTotal = computed(() =>
+  statusSegments.value.reduce((acc, s) => acc + s.count, 0)
+);
+
+const statusDonutGradient = computed(() => {
+  let cursor = 0;
+  const parts = statusSegments.value.map((seg, i, arr) => {
+    const start = cursor;
+    cursor += seg.pct;
+    const end = i === arr.length - 1 ? 100 : cursor;
+    return `${seg.color} ${start}% ${end}%`;
+  });
+  return `conic-gradient(${parts.join(", ")})`;
 });
 </script>
 
@@ -233,17 +433,23 @@ onUnmounted(() => {
 
 /* Split Hero Styles */
 .hero-section {
-  padding: 4rem 1.5rem;
+  padding: 3.5rem 1.25rem 2.5rem;
   background: linear-gradient(135deg, #f0fdf4 0%, #e6f7ed 100%);
   border-bottom: 1px solid rgba(9, 74, 37, 0.05);
 }
 
-.hero-grid {
+.hero-inner {
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.hero-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 4rem;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 3rem;
   align-items: center;
 }
 
@@ -335,6 +541,285 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+  max-height: 420px;
+}
+
+/* RITE Pulse — full-width analytics strip */
+.rite-pulse-panel {
+  background: #ffffff;
+  border: 1px solid rgba(9, 74, 37, 0.10);
+  border-radius: 20px;
+  padding: 1.15rem 1.25rem 1.25rem;
+  box-shadow: 0 16px 40px -20px rgba(9, 74, 37, 0.18);
+}
+
+.rite-pulse-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.rite-pulse-head h3 {
+  margin: 0;
+  font-family: "Outfit", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #053018;
+}
+
+.rite-pulse-head p {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.rite-pulse-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.rite-pulse-updated {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f766e;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+}
+
+.rite-pulse-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.pulse-stat {
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pulse-stat-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.pulse-stat-value {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #094A25;
+  line-height: 1;
+}
+
+.rite-pulse-charts {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.pulse-chart-card {
+  background: linear-gradient(135deg, rgba(240, 253, 244, 0.85) 0%, rgba(230, 247, 237, 0.85) 100%);
+  border: 1px solid rgba(9, 74, 37, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem 0.7rem;
+  min-width: 0;
+}
+
+.pulse-chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pulse-chart-head h4 {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #053018;
+}
+
+.pulse-chart-head span {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.pulse-svg {
+  width: 100%;
+  height: 72px;
+  display: block;
+}
+
+.pulse-chart-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pulse-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.35rem;
+  height: 100px;
+  padding-top: 0.25rem;
+}
+
+.pulse-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.pulse-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pulse-bar-fill {
+  width: 70%;
+  max-width: 28px;
+  background: linear-gradient(180deg, #3d6b52 0%, #094A25 100%);
+  border-radius: 5px 5px 2px 2px;
+  min-height: 6px;
+  transition: height 0.3s ease;
+}
+
+.pulse-bar-val {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #094A25;
+  margin-top: 0.25rem;
+}
+
+.pulse-bar-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.1;
+  margin-top: 0.15rem;
+  word-break: break-word;
+}
+
+.pulse-empty {
+  margin: auto;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.pulse-donut-layout {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pulse-donut {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-donut-hole {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+.pulse-donut-hole strong {
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  color: #094A25;
+  line-height: 1;
+}
+
+.pulse-donut-hole span {
+  font-size: 0.55rem;
+  color: #94a3b8;
+}
+
+.pulse-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.pulse-legend li {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  color: #475569;
+}
+
+.pulse-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.pulse-legend strong {
+  color: #053018;
+  font-size: 0.72rem;
 }
 
 .showcase-card {
@@ -866,7 +1351,7 @@ onUnmounted(() => {
 @media (max-width: 1024px) {
   .hero-grid {
     grid-template-columns: 1fr;
-    gap: 3.5rem;
+    gap: 2.5rem;
   }
   .hero-left {
     align-items: center;
@@ -877,6 +1362,18 @@ onUnmounted(() => {
   }
   .hero-actions {
     justify-content: center;
+  }
+  .hero-image-showcase {
+    max-height: none;
+  }
+  .rite-pulse-charts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pulse-chart-wide {
+    grid-column: 1 / -1;
+  }
+  .rite-pulse-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .spotlight-dashboard {
     grid-template-columns: 1fr;
@@ -896,6 +1393,21 @@ onUnmounted(() => {
   }
 }
 
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 2.5rem 1rem 2rem;
+  }
+  .rite-pulse-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rite-pulse-charts {
+    grid-template-columns: 1fr;
+  }
+  .pulse-donut-layout {
+    flex-direction: row;
+  }
+}
+
 @media (max-width: 480px) {
   .hero-actions {
     flex-direction: column;
@@ -908,6 +1420,12 @@ onUnmounted(() => {
   .showcase-controls {
     top: auto;
     bottom: 1.5rem;
+  }
+  .rite-pulse-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pulse-stat-value {
+    font-size: 1.1rem;
   }
 }
 </style>
