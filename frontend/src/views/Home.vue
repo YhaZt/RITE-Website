@@ -19,28 +19,24 @@
           </div>
 
           <div class="hero-right">
-            <div class="hero-image-showcase">
-              <div class="showcase-card shadow-lg">
-                <transition name="fade-slide" mode="out-in">
-                  <div :key="currentHeroIndex" class="showcase-slide" :style="{ backgroundImage: `url(${homeCarouselSlides[currentHeroIndex].image})` }">
-                    <div class="slide-overlay"></div>
-                    <div class="slide-content">
-                      <span class="slide-category">Key Focus</span>
-                      <h3>{{ homeCarouselSlides[currentHeroIndex].title }}</h3>
-                      <p>{{ homeCarouselSlides[currentHeroIndex].description }}</p>
-                    </div>
+            <div class="hero-widget-layout">
+              <div class="hero-big-stack">
+                <div v-for="card in heroBigCards" :key="card.id" class="hero-big-card">
+                  <div class="hero-big-card-head">
+                    <h4>Inquiries by Unit</h4>
+                    <span>All time</span>
                   </div>
-                </transition>
-                <div class="showcase-controls">
-                  <button @click="prevHero" class="control-btn" aria-label="Previous slide">‹</button>
-                  <button @click="nextHero" class="control-btn" aria-label="Next slide">›</button>
+                  <div class="hero-big-card-body">
+                    <p class="hero-big-card-empty">No inquiry data yet</p>
+                  </div>
                 </div>
               </div>
-              <div class="floating-badge-box">
-                <svg class="badge-svg-icon" viewBox="0 0 24 24" width="22" height="22" stroke="#10b981" stroke-width="2" fill="none"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9 0 4.4-3.6 8-8 8Z"></path><path d="M11 20v-9"></path></svg>
-                <div>
-                  <h4>RITE Innovation</h4>
-                  <p>Ecosystem driven</p>
+              <div class="hero-small-stack">
+                <div v-for="card in heroSmallCards" :key="card.id" class="hero-small-card">
+                  <div class="hero-small-card-content">
+                    <span class="hero-small-card-label">{{ card.label }}</span>
+                    <strong class="hero-small-card-value">{{ card.value }}</strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -102,7 +98,7 @@
 
             <div class="pulse-chart-card">
               <div class="pulse-chart-head">
-                <h4>{{ statusChartTitle }}</h4>
+                <h4>Partner Categories</h4>
                 <span>Distribution</span>
               </div>
               <div class="pulse-donut-layout">
@@ -212,13 +208,13 @@
         <article v-for="item in homeNewsItems" :key="item.id" class="news-card">
           <a :href="item.link" target="_blank" rel="noopener noreferrer" class="news-card-link">
             <div class="news-image-wrapper">
-              <img :src="item.image" :alt="item.title" loading="lazy" class="news-img" />
+              <img :src="resolveImageUrl(item.image)" :alt="item.title" loading="lazy" class="news-img" />
               <span class="news-category-badge">{{ item.category }}</span>
             </div>
             <div class="news-content">
               <span class="news-date">{{ item.date }}</span>
               <h3 class="news-title">{{ item.title }}</h3>
-              <p class="news-desc">{{ item.description }}</p>
+              <p class="news-desc">{{ newsTeaser(item.description) }}</p>
             </div>
           </a>
         </article>
@@ -233,6 +229,7 @@ import { homeCarouselSlides as staticSlides, homeFeatureCards, homePageOverviews
 import { carouselService } from "@/services/carouselService";
 import { newsService } from "@/services/newsService";
 import { publicMetricsService } from "@/services/publicMetricsService";
+import { resolveStorageUrl } from "@/services/mediaService";
 
 const homeCarouselSlides = ref(staticSlides);
 const homeNewsItems = ref(staticNews);
@@ -241,19 +238,14 @@ const publicMetricsUpdatedAt = ref(null);
 
 let publicMetricsInterval = null;
 
-// Hero Image Carousel Slider
-const currentHeroIndex = ref(0);
-let heroInterval = null;
-
-const nextHero = () => {
-  if (homeCarouselSlides.value.length === 0) return;
-  currentHeroIndex.value = (currentHeroIndex.value + 1) % homeCarouselSlides.value.length;
+const newsTeaser = (html) => {
+  const div = document.createElement("div");
+  div.innerHTML = html || "";
+  const text = (div.textContent || "").trim();
+  return text.length > 160 ? `${text.slice(0, 160)}…` : text;
 };
 
-const prevHero = () => {
-  if (homeCarouselSlides.value.length === 0) return;
-  currentHeroIndex.value = (currentHeroIndex.value - 1 + homeCarouselSlides.value.length) % homeCarouselSlides.value.length;
-};
+const resolveImageUrl = (url) => resolveStorageUrl(url);
 
 // Spotlight Tab System
 const spotlightIdx = ref(0);
@@ -293,8 +285,6 @@ onMounted(async () => {
     console.warn("Using static news fallback", e);
   }
 
-  // Start Hero Auto Slider
-  heroInterval = setInterval(nextHero, 6000);
   // Start Spotlight Auto Slider
   resetSpotlightInterval();
 
@@ -314,7 +304,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (heroInterval) clearInterval(heroInterval);
   if (spotlightInterval) clearInterval(spotlightInterval);
   if (publicMetricsInterval) clearInterval(publicMetricsInterval);
 });
@@ -366,10 +355,31 @@ const buildLinePoints = (points, w = 360, h = 100) => {
 
 const trendLinePoints = computed(() => buildLinePoints(pmSeries.value));
 
+const heroBigCards = [{ id: "inquiry-1" }, { id: "inquiry-2" }, { id: "inquiry-3" }];
+
+const heroSmallCards = computed(() => {
+  const metrics = [
+    { id: "centers", label: "RESEARCH CENTERS", value: pulseCounters.value.research_centers },
+    { id: "partners", label: "ECOSYSTEM PARTNERS", value: pulseCounters.value.ecosystem_partners },
+    { id: "news", label: "NEWS & EVENTS", value: pulseCounters.value.news_items },
+    { id: "hero", label: "HERO INITIATIVES", value: pulseCounters.value.carousel_slides },
+    { id: "inquiries", label: "TOTAL INQUIRIES", value: pulseCounters.value.total_inquiries },
+  ];
+  const cards = [...metrics];
+  while (cards.length < 7) {
+    cards.push({
+      id: `pad-${cards.length}`,
+      label: "ECOSYSTEM PARTNERS",
+      value: pulseCounters.value.ecosystem_partners,
+    });
+  }
+  return cards.slice(0, 7);
+});
+
 const unitBars = computed(() => {
   const rows = publicMetrics.value?.breakdowns?.inquiries_by_unit || [];
   const max = Math.max(...rows.map((r) => r.count), 1);
-  return rows.slice(0, 4).map((r) => ({
+  return rows.map((r) => ({
     label: r.label,
     shortLabel: r.label.replace("Publication & Printing", "Pub. & Print").replace("Research Centers", "Centers"),
     count: r.count,
@@ -377,7 +387,7 @@ const unitBars = computed(() => {
   }));
 });
 
-const STATUS_COLORS = { Pending: "#094A25", Reviewed: "#22c55e", Completed: "#eab308" };
+const STATUS_COLORS = { Pending: "#094A25", Completed: "#22c55e" };
 const ECOSYSTEM_COLORS = ["#094A25", "#22c55e", "#0ea5e9", "#eab308", "#8b5cf6"];
 
 const inquiryStatus = computed(() => publicMetrics.value?.breakdowns?.inquiry_status || []);
@@ -388,9 +398,7 @@ const statusChartTitle = computed(() =>
 );
 
 const statusSegments = computed(() => {
-  const source = inquiryStatus.value.some((s) => s.count > 0)
-    ? inquiryStatus.value
-    : ecosystemCats.value;
+  const source = ecosystemCats.value;
 
   if (!source.length) {
     return [
@@ -535,6 +543,228 @@ const statusDonutGradient = computed(() => {
 
 .hero-right {
   position: relative;
+}
+
+.hero-widget-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.hero-big-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.hero-big-card {
+  background: #f0faf5;
+  border: 1px solid rgba(9, 74, 37, 0.08);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  min-height: 88px;
+}
+
+.hero-big-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.65rem;
+}
+
+.hero-big-card-head h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1b3b32;
+}
+
+.hero-big-card-head span {
+  font-size: 0.72rem;
+  color: #8a99a8;
+  font-weight: 600;
+}
+
+.hero-big-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.hero-big-card-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #8a99a8;
+  text-align: center;
+}
+
+.hero-big-card-unit {
+  margin: 0 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.hero-big-card-count {
+  font-size: 1.5rem;
+  color: #094a25;
+}
+
+.hero-small-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-small-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  min-height: 56px;
+}
+
+.hero-small-card-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+
+.hero-small-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-small-card-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-small-card-value {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #094a25;
+  font-family: "Outfit", sans-serif;
+  line-height: 1.1;
+}
+
+.hero-widgets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hero-widget-card {
+  background: #fff;
+  border: 1px solid rgba(9, 74, 37, 0.10);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 24px -12px rgba(9, 74, 37, 0.15);
+}
+
+.hero-widget-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.hero-widget-head h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #053018;
+}
+
+.hero-widget-head span {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.hero-widget-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-widget-bar-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.72rem;
+}
+
+.hero-widget-bar-label {
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-widget-bar-track {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hero-widget-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #094A25);
+  border-radius: 999px;
+}
+
+.hero-widget-bar-val {
+  font-weight: 800;
+  color: #094A25;
+  min-width: 1.2rem;
+  text-align: right;
+}
+
+.hero-widget-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.hero-widget-stat {
+  text-align: center;
+  padding: 1.25rem 1rem;
+}
+
+.hero-widget-stat-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.hero-widget-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #094A25;
+  font-family: "Outfit", sans-serif;
 }
 
 .hero-image-showcase {
@@ -695,10 +925,12 @@ const statusDonutGradient = computed(() => {
 .pulse-bars {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.35rem;
   height: 100px;
   padding-top: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .pulse-bar-col {
@@ -1362,6 +1594,9 @@ const statusDonutGradient = computed(() => {
   }
   .hero-actions {
     justify-content: center;
+  }
+  .hero-widget-layout {
+    grid-template-columns: 1fr;
   }
   .hero-image-showcase {
     max-height: none;

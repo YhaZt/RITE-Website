@@ -169,7 +169,7 @@
 
           <div class="input-group">
             <label>Attach Reference File / Proposal (PDF, DOCX, ZIP, Max 10MB)</label>
-            <input type="file" @change="handleFileUpload" class="file-input" accept=".pdf,.doc,.docx,.zip,.jpg,.png" />
+            <input type="file" @change="handleFileUpload" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" />
           </div>
 
           <div class="modal-footer-btns">

@@ -78,11 +78,23 @@ class PublicMetricsController extends Controller
                 ->groupBy('status')
                 ->pluck('count', 'status');
 
-            $statusBreakdown = collect(['pending', 'reviewed', 'completed'])
+            $statusLabels = [
+                'pending' => 'Pending',
+                'reviewing' => 'Reviewing',
+                'reviewed' => 'Reviewed',
+                'decline' => 'Decline',
+                'approve' => 'Approve',
+                'completed' => 'Approve',
+                'suggestion' => 'Suggestion',
+            ];
+
+            $statusBreakdown = collect(array_keys($statusLabels))
                 ->map(fn ($status) => [
-                    'label' => ucfirst($status),
+                    'label' => $statusLabels[$status],
                     'count' => (int) ($statusMap[$status] ?? 0),
                 ])
+                ->filter(fn ($row) => $row['count'] > 0)
+                ->values()
                 ->all();
 
             $ecosystemCategories = EcosystemItem::query()

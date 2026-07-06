@@ -66,6 +66,6 @@ class ContactController extends Controller
         $submission = ContactSubmission::findOrFail($id);
         $submission->delete();
 
-        return response()->json(['message' => 'Contact submission deleted successfully']);
+        return response()->json(['message' => 'Contact submission archived successfully']);
     }
 }

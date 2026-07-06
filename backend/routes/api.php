@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\OrgMemberController;
 use App\Http\Controllers\Api\EcosystemController;
 use App\Http\Controllers\Api\UnitSubmissionController;
 use App\Http\Controllers\Api\PublicMetricsController;
+use App\Http\Controllers\Api\MediaController;
 
 // Auth Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,6 +30,8 @@ Route::apiResource('org-members', OrgMemberController::class);
 Route::apiResource('ecosystem', EcosystemController::class);
 Route::apiResource('submissions', UnitSubmissionController::class);
 Route::patch('submissions/{id}/status', [UnitSubmissionController::class, 'updateStatus']);
+Route::get('submissions/attachment/preview', [UnitSubmissionController::class, 'previewFile']);
+Route::post('media', [MediaController::class, 'store']);
 
 // Public-safe dashboard metrics (cached, no auth required)
 Route::get('/public/metrics', [PublicMetricsController::class, 'index']);

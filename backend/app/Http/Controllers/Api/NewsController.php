@@ -24,6 +24,7 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
+            'tags' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'date' => 'nullable|string',
             'image' => 'nullable|string',
@@ -54,6 +55,7 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'category' => 'nullable|string|max:255',
+            'tags' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'date' => 'nullable|string',
             'image' => 'nullable|string',

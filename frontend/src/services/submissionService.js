@@ -13,8 +13,8 @@ export const submissionService = {
     });
     return res.data;
   },
-  async updateStatus(id, status) {
-    const res = await http.patch(`/submissions/${id}/status`, { status });
+  async updateStatus(id, status, adminNote) {
+    const res = await http.patch(`/submissions/${id}/status`, { status, admin_note: adminNote });
     return res.data;
   },
   async delete(id) {

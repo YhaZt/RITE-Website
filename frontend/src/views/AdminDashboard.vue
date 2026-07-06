@@ -98,8 +98,10 @@
             :key="metric.id"
             type="button"
             class="metric-card"
+            :title="`View ${metric.subtitle}`"
             @click="metric.onClick()"
           >
+            <span class="metric-card-action">View details →</span>
             <div class="metric-card-head">
               <div class="metric-icon" :class="metric.tone">
                 <span class="metric-icon-svg" v-html="metric.icon"></span>
@@ -490,20 +492,21 @@
                 <td>
                   <div class="html-snippet" style="max-width:200px;">{{ sub.message }}</div>
                   <div v-if="sub.file_path" style="margin-top:0.4rem;">
-                    <a :href="sub.file_path" target="_blank" download style="color:#059669; font-weight:700; font-size:0.85rem; text-decoration:underline;">
-                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:4px; vertical-align:middle;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg> Download {{ sub.file_name || 'Attachment' }}
-                    </a>
+                    <button type="button" class="btn-link-preview" @click="openFilePreview(sub)">
+                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right:4px; vertical-align:middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      Preview {{ sub.file_name || 'Attachment' }}
+                    </button>
                   </div>
                   <span v-else style="font-size:0.75rem; color:#94a3b8;">No file attached</span>
                 </td>
                 <td>
-                  <span class="tag-badge" :class="sub.status === 'completed' ? 'green' : sub.status === 'reviewed' ? 'blue' : 'purple'">
-                    {{ sub.status }}
+                  <span class="tag-badge" :class="submissionStatusBadgeClass(sub.status)">
+                    {{ submissionStatusLabel(sub.status) }}
                   </span>
                 </td>
                 <td class="actions">
-                  <button class="btn-sm edit" @click="toggleSubmissionStatus(sub)">Toggle Status</button>
-                  <button class="btn-sm delete" @click="deleteSubmission(sub.id)">Delete</button>
+                  <button class="btn-sm edit" @click="openStatusModal(sub)">Update Status</button>
+                  <button class="btn-sm delete" @click="deleteSubmission(sub.id)">Archive</button>
                 </td>
               </tr>
             </tbody>
@@ -519,48 +522,23 @@
 
     <!-- UNIVERSAL MODAL DIALOG WITH WYSIWYG EDITOR -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
+      <div class="modal-content" :class="{ 'modal-content--wide': activeTab === 'news' }">
         <div class="modal-header">
           <h3>{{ modalTitle }}</h3>
           <button class="modal-close" @click="closeModal">✕</button>
         </div>
         <form @submit.prevent="saveForm" class="modal-form">
-          <!-- NEWS FORM WITH WYSIWYG -->
+          <!-- NEWS FORM WITH ARTICLE EDITOR -->
           <div v-if="activeTab === 'news'">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Title</label>
-                <input v-model="form.title" required type="text" placeholder="Announcement title..." />
-              </div>
-              <div class="form-group">
-                <label>Category</label>
-                <input v-model="form.category" type="text" placeholder="e.g. Announcement, Event" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Date String</label>
-                <input v-model="form.date" type="text" placeholder="e.g. June 5 - 6, 2026" />
-              </div>
-              <div class="form-group">
-                <label>Image URL</label>
-                <input v-model="form.image" type="text" placeholder="/globalislands.jpg or https://..." />
-              </div>
-            </div>
-
-            <!-- WYSIWYG TOOLBAR & EDITOR -->
-            <div class="form-group">
-              <label>Rich Content (WYSIWYG Editor)</label>
-              <div class="wysiwyg-toolbar">
-                <button type="button" @click="applyWysiwyg('b')" title="Bold"><b>B</b></button>
-                <button type="button" @click="applyWysiwyg('i')" title="Italic"><i>I</i></button>
-                <button type="button" @click="applyWysiwyg('h2')" title="Heading 2">H2</button>
-                <button type="button" @click="applyWysiwyg('h3')" title="Heading 3">H3</button>
-                <button type="button" @click="applyWysiwyg('p')" title="Paragraph">P</button>
-                <button type="button" @click="applyWysiwyg('ul')" title="Bullet List">• List</button>
-              </div>
-              <textarea v-model="form.description" rows="6" placeholder="Write news description with HTML/WYSIWYG tags..." class="wysiwyg-textarea"></textarea>
-            </div>
+            <ArticleEditor
+              v-model:title="form.title"
+              v-model:category="form.category"
+              v-model:tags="form.tags"
+              v-model:date-iso="form.dateIso"
+              v-model:image="form.image"
+              v-model:link="form.link"
+              v-model:description="form.description"
+            />
           </div>
 
           <!-- CAROUSEL FORM -->
@@ -574,8 +552,8 @@
               <input v-model.number="form.sort_order" type="number" />
             </div>
             <div class="form-group">
-              <label>Image URL</label>
-              <input v-model="form.image" type="text" />
+              <label>Slide Image</label>
+              <ImageUploadField v-model="form.image" />
             </div>
             <div class="form-group">
               <label>Description</label>
@@ -598,6 +576,10 @@
               <input v-model="form.contact_email" type="email" />
             </div>
             <div class="form-group">
+              <label>Center Image</label>
+              <ImageUploadField v-model="form.image" />
+            </div>
+            <div class="form-group">
               <label>Description</label>
               <textarea v-model="form.description" rows="3"></textarea>
             </div>
@@ -615,30 +597,8 @@
                 <input v-model="form.category" type="text" placeholder="gov, academic..." />
               </div>
               <div class="form-group">
-                <label>Logo / Image Dropdown *</label>
-                <select v-model="form.image" style="width:100%; padding:0.65rem; border:1px solid #cbd5e1; border-radius:8px;">
-                  <option value="">-- Select Available Logo --</option>
-                  <option value="https://tucst.edu.vn/icon/logo_dhvh.jpg">Thanh Hoa University Logo</option>
-                  <option value="https://file.vnua.edu.vn/data/6/images/2019/08/14/host/logo.png">VNUA Logo</option>
-                  <option value="https://www.um.edu.my/images/img-logo-UM.png">Universiti Malaya Logo</option>
-                  <option value="/ecosystem/SIU_logo_Head.png">Shinawatra University Logo</option>
-                  <option value="/ecosystem/national Research.png">National Research Council Logo</option>
-                  <option value="https://acef.da.gov.ph/wp-content/uploads/2018/03/DA-Logo.png">Department of Agriculture Logo</option>
-                  <option value="/ecosystem/dost_mimaropa.png">DOST MIMAROPA Logo</option>
-                  <option value="/ecosystem/BatStateU-NEU-Logo.png">BatStateU Logo</option>
-                  <option value="/ecosystem/mapua.png">Mapua Logo</option>
-                  <option value="/ecosystem/nu-logo.webp">NU Sports Academy Logo</option>
-                  <option value="/ecosystem/upd-logo-2021.jpg">UP Diliman Logo</option>
-                  <option value="https://www.ust.edu.ph/wp-content/uploads/2019/07/logoustb.png">UST Logo</option>
-                  <option value="/ecosystem/mansalay.png">Mansalay LGU Logo</option>
-                  <option value="/ecosystem/Calapan_City_Logo-1.png">Calapan City Logo</option>
-                  <option value="/ecosystem/DENR-IV-A-CALABARZON.png">DENR CENRO Logo</option>
-                  <option value="/ecosystem/cropped-PGOM-100x100.png">PGOM Logo</option>
-                  <option value="/ecosystem/DSWD.png">DSWD Logo</option>
-                  <option value="/ecosystem/DAR.png">DAR Logo</option>
-                  <option value="/ecosystem/DTI.jpg">DTI Logo</option>
-                </select>
-                <input v-model="form.image" type="text" placeholder="Or enter custom URL..." style="margin-top:0.4rem; font-size:0.85rem;" />
+                <label>Partner Logo</label>
+                <ImageUploadField v-model="form.image" :preset-urls="ecosystemPresetUrls" />
               </div>
             </div>
             <div class="form-group">
@@ -690,6 +650,50 @@
         </form>
       </div>
     </div>
+
+    <!-- SUBMISSION STATUS WORKFLOW MODAL -->
+    <div v-if="showStatusModal" class="modal-overlay" @click.self="closeStatusModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Update Submission Status</h3>
+          <button class="modal-close" @click="closeStatusModal">✕</button>
+        </div>
+        <form @submit.prevent="submitStatusUpdate" class="modal-form">
+          <div v-if="statusTarget" class="status-summary">
+            <p><strong>Sender:</strong> {{ statusTarget.sender_name }} ({{ statusTarget.email }})</p>
+            <p><strong>Subject:</strong> {{ statusTarget.subject }}</p>
+            <p><strong>Unit:</strong> {{ statusTarget.target_unit }}</p>
+            <p>
+              <strong>Current status:</strong>
+              <span class="tag-badge" :class="submissionStatusBadgeClass(statusTarget.status)">
+                {{ submissionStatusLabel(statusTarget.status) }}
+              </span>
+            </p>
+          </div>
+          <div class="form-group">
+            <label>New Status</label>
+            <select v-model="statusForm.newStatus" required style="width:100%; padding:0.65rem; border:1px solid #cbd5e1; border-radius:8px;">
+              <option v-for="opt in SUBMISSION_STATUSES" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Message to Sender <span style="color:#dc2626;">*</span></label>
+            <textarea v-model="statusForm.adminNote" rows="4" required placeholder="Write an update or comment that will be emailed to the sender..." style="width:100%; padding:0.65rem; border:1px solid #cbd5e1; border-radius:8px;"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" @click="closeStatusModal">Cancel</button>
+            <button type="submit" class="btn-primary">Send Update &amp; Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <FilePreviewModal
+      :visible="previewFile.show"
+      :file-path="previewFile.path"
+      :file-name="previewFile.name"
+      @close="previewFile.show = false"
+    />
   </div>
 </template>
 
@@ -704,6 +708,37 @@ import { contactService } from '@/services/contactService';
 import { ecosystemService } from '@/services/ecosystemService';
 import { orgService } from '@/services/orgService';
 import { submissionService } from '@/services/submissionService';
+import {
+  SUBMISSION_STATUSES,
+  submissionStatusLabel,
+  submissionStatusBadgeClass,
+  SUBMISSION_STATUS_COLORS,
+} from '@/constants/submissionStatuses';
+import ArticleEditor from '@/components/ArticleEditor.vue';
+import ImageUploadField from '@/components/ImageUploadField.vue';
+import FilePreviewModal from '@/components/FilePreviewModal.vue';
+
+const ecosystemPresetUrls = [
+  'https://tucst.edu.vn/icon/logo_dhvh.jpg',
+  'https://file.vnua.edu.vn/data/6/images/2019/08/14/host/logo.png',
+  'https://www.um.edu.my/images/img-logo-UM.png',
+  '/ecosystem/SIU_logo_Head.png',
+  '/ecosystem/national Research.png',
+  'https://acef.da.gov.ph/wp-content/uploads/2018/03/DA-Logo.png',
+  '/ecosystem/dost_mimaropa.png',
+  '/ecosystem/BatStateU-NEU-Logo.png',
+  '/ecosystem/mapua.png',
+  '/ecosystem/nu-logo.webp',
+  '/ecosystem/upd-logo-2021.jpg',
+  'https://www.ust.edu.ph/wp-content/uploads/2019/07/logoustb.png',
+  '/ecosystem/mansalay.png',
+  '/ecosystem/Calapan_City_Logo-1.png',
+  '/ecosystem/DENR-IV-A-CALABARZON.png',
+  '/ecosystem/cropped-PGOM-100x100.png',
+  '/ecosystem/DSWD.png',
+  '/ecosystem/DAR.png',
+  '/ecosystem/DTI.jpg',
+];
 
 const router = useRouter();
 const { logout } = useAuth();
@@ -827,23 +862,21 @@ const projectStatusSegments = computed(() => {
   const total = submissionList.value.length;
   if (total === 0) {
     return [
-      { label: 'Ongoing', pct: 45, color: '#094A25' },
-      { label: 'Completed', pct: 30, color: '#22c55e' },
-      { label: 'For Review', pct: 15, color: '#eab308' },
-      { label: 'Not Started', pct: 10, color: '#94a3b8' },
+      { label: 'Pending', pct: 40, color: '#094A25' },
+      { label: 'Reviewing', pct: 25, color: '#0ea5e9' },
+      { label: 'Reviewed', pct: 20, color: '#22c55e' },
+      { label: 'Approve', pct: 15, color: '#15803d' },
     ];
   }
-  const pending = submissionList.value.filter((s) => s.status === 'pending').length;
-  const reviewed = submissionList.value.filter((s) => s.status === 'reviewed').length;
-  const completed = submissionList.value.filter((s) => s.status === 'completed').length;
-  const other = Math.max(0, total - pending - reviewed - completed);
   const toPct = (n) => Math.round((n / total) * 100);
-  const segments = [
-    { label: 'Pending', pct: toPct(pending), color: '#094A25' },
-    { label: 'Under Review', pct: toPct(reviewed), color: '#22c55e' },
-    { label: 'Completed', pct: toPct(completed), color: '#eab308' },
-    { label: 'Other', pct: toPct(other), color: '#94a3b8' },
-  ].filter((s) => s.pct > 0);
+  const segments = SUBMISSION_STATUSES.map((opt) => {
+    const count = submissionList.value.filter((s) => normalizeStatus(s.status) === opt.value).length;
+    return {
+      label: opt.label,
+      pct: toPct(count),
+      color: SUBMISSION_STATUS_COLORS[opt.label] || '#94a3b8',
+    };
+  }).filter((s) => s.pct > 0);
   const sum = segments.reduce((acc, s) => acc + s.pct, 0);
   if (sum < 100 && segments.length) segments[0].pct += 100 - sum;
   return segments;
@@ -951,6 +984,25 @@ const modalTitle = ref('');
 const editingId = ref(null);
 const form = ref({});
 
+const showStatusModal = ref(false);
+const statusTarget = ref(null);
+const statusForm = ref({ newStatus: 'pending', adminNote: '' });
+
+const previewFile = ref({ show: false, path: '', name: '' });
+
+const parseDateToIso = (dateStr) => {
+  if (!dateStr) return new Date().toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const parsed = new Date(dateStr);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString().slice(0, 10) : parsed.toISOString().slice(0, 10);
+};
+
+const formatDateForStorage = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+};
+
 const getTabTitle = () => {
   const titles = {
     overview: 'Console Dashboard Overview',
@@ -976,24 +1028,51 @@ const loadAll = async () => {
 };
 
 const deleteSubmission = async (id) => {
-  if (confirm('Are you sure you want to delete this submission and its attached file?')) {
+  if (confirm('Archive this submission? It will be hidden from the list but files are retained.')) {
     try {
       await submissionService.delete(id);
       await loadAll();
     } catch (e) {
-      alert('Failed to delete submission.');
+      alert('Failed to archive submission.');
     }
   }
 };
 
-const toggleSubmissionStatus = async (sub) => {
-  const nextStatus = sub.status === 'pending' ? 'reviewed' : sub.status === 'reviewed' ? 'completed' : 'pending';
+const normalizeStatus = (status) => (status === 'completed' ? 'approve' : status);
+
+const openStatusModal = (sub) => {
+  statusTarget.value = sub;
+  statusForm.value = { newStatus: normalizeStatus(sub.status), adminNote: '' };
+  showStatusModal.value = true;
+};
+
+const closeStatusModal = () => {
+  showStatusModal.value = false;
+  statusTarget.value = null;
+  statusForm.value = { newStatus: 'pending', adminNote: '' };
+};
+
+const submitStatusUpdate = async () => {
+  if (!statusForm.value.adminNote.trim()) {
+    alert('Please enter a message for the sender.');
+    return;
+  }
   try {
-    await submissionService.updateStatus(sub.id, nextStatus);
+    await submissionService.updateStatus(
+      statusTarget.value.id,
+      statusForm.value.newStatus,
+      statusForm.value.adminNote.trim()
+    );
+    closeStatusModal();
     await loadAll();
+    alert('Status updated and email sent to sender.');
   } catch (e) {
     alert('Failed to update status.');
   }
+};
+
+const openFilePreview = (sub) => {
+  previewFile.value = { show: true, path: sub.file_path, name: sub.file_name || 'Attachment' };
 };
 
 let realtimeInterval = null;
@@ -1012,22 +1091,29 @@ const handleLogout = async () => {
   router.push({ name: 'Login' });
 };
 
-// WYSIWYG Helper
-const applyWysiwyg = (tag) => {
-  const current = form.value.description || '';
-  if (tag === 'b') form.value.description = current + '<strong>bold text</strong>';
-  else if (tag === 'i') form.value.description = current + '<em>italic text</em>';
-  else if (tag === 'h2') form.value.description = current + '<h2>Subheading Title</h2>';
-  else if (tag === 'h3') form.value.description = current + '<h3>Section Header</h3>';
-  else if (tag === 'p') form.value.description = current + '<p>Paragraph text here...</p>';
-  else if (tag === 'ul') form.value.description = current + '<ul>\n  <li>List item 1</li>\n  <li>List item 2</li>\n</ul>';
-};
-
 // Modals
 const openNewsModal = (item = null) => {
   editingId.value = item ? item.id : null;
-  modalTitle.value = item ? 'Edit News Announcement' : 'Add New News Announcement';
-  form.value = item ? { ...item } : { title: '', category: 'Announcement', date: '', description: '', image: '' };
+  modalTitle.value = item ? 'Edit News Article' : 'Create Article';
+  if (item) {
+    form.value = {
+      ...item,
+      tags: item.tags || '',
+      link: item.link || '',
+      dateIso: parseDateToIso(item.date),
+    };
+  } else {
+    form.value = {
+      title: '',
+      category: 'Announcement',
+      date: '',
+      dateIso: new Date().toISOString().slice(0, 10),
+      description: '',
+      image: '',
+      tags: '',
+      link: '',
+    };
+  }
   showModal.value = true;
 };
 
@@ -1041,7 +1127,7 @@ const openCarouselModal = (slide = null) => {
 const openCenterModal = (center = null) => {
   editingId.value = center ? center.id : null;
   modalTitle.value = center ? 'Edit Research Center' : 'Add Research Center';
-  form.value = center ? { ...center } : { name: '', category: '', contact_email: '', description: '' };
+  form.value = center ? { ...center } : { name: '', category: '', contact_email: '', description: '', image: '' };
   showModal.value = true;
 };
 
@@ -1068,8 +1154,17 @@ const closeModal = () => {
 const saveForm = async () => {
   try {
     if (activeTab.value === 'news') {
-      if (editingId.value) await newsService.update(editingId.value, form.value);
-      else await newsService.create(form.value);
+      const payload = {
+        title: form.value.title,
+        category: form.value.category,
+        tags: form.value.tags,
+        description: form.value.description,
+        image: form.value.image,
+        link: form.value.link,
+        date: formatDateForStorage(form.value.dateIso),
+      };
+      if (editingId.value) await newsService.update(editingId.value, payload);
+      else await newsService.create(payload);
     } else if (activeTab.value === 'carousel') {
       if (editingId.value) await carouselService.update(editingId.value, form.value);
       else await carouselService.create(form.value);
@@ -1095,7 +1190,7 @@ const deleteCarousel = async (id) => { if (confirm("Delete slide?")) { await car
 const deleteCenter = async (id) => { if (confirm("Delete center?")) { await centerService.delete(id); loadAll(); } };
 const deleteEcosystem = async (id) => { if (confirm("Delete ecosystem partner?")) { await ecosystemService.delete(id); loadAll(); } };
 const deleteOrg = async (id) => { if (confirm("Delete org member?")) { await orgService.delete(id); loadAll(); } };
-const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await contactService.delete(id); loadAll(); } };
+const deleteContact = async (id) => { if (confirm("Archive this inquiry?")) { await contactService.delete(id); loadAll(); } };
 </script>
 
 <style scoped>
@@ -1148,7 +1243,7 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 }
 
 .brand-logo-svg { color: #10b981; }
-.brand-text h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; }
+.brand-text h2 { margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: rgba(255, 255, 255, 1); }
 .brand-text p { margin: 0; font-size: 0.75rem; opacity: 0.7; }
 
 .sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
@@ -1241,20 +1336,48 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 }
 
 .metric-card {
+  position: relative;
   background: #fff;
   border: 1px solid #d5e5dd;
   border-radius: 14px;
   padding: 1.1rem 1.15rem 1rem;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
   box-shadow: 0 4px 14px rgba(9, 74, 37, 0.04);
+  overflow: hidden;
+}
+
+.metric-card-action {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #059669;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .metric-card:hover {
-  transform: translateY(-2px);
-  border-color: #94c4ad;
-  box-shadow: 0 10px 24px rgba(9, 74, 37, 0.1);
+  transform: translateY(-4px);
+  border-color: #059669;
+  background: #f8fffb;
+  box-shadow: 0 14px 32px rgba(9, 74, 37, 0.14);
+}
+
+.metric-card:hover .metric-card-action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.metric-card:hover .metric-value {
+  color: #094A25;
+}
+
+.metric-card:active {
+  transform: translateY(-1px);
 }
 
 .metric-card-head {
@@ -1332,6 +1455,21 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
   border-radius: 14px;
   padding: 1.15rem 1.25rem 1.25rem;
   box-shadow: 0 4px 14px rgba(9, 74, 37, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  border-color: #94c4ad;
+  box-shadow: 0 12px 28px rgba(9, 74, 37, 0.1);
+}
+
+.centers-panel {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.centers-panel:hover {
+  box-shadow: 0 10px 24px rgba(9, 74, 37, 0.08);
 }
 
 .chart-title {
@@ -1523,9 +1661,10 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 }
 
 .center-mini-card:hover {
-  background: #e8f4ee;
-  border-color: #94c4ad;
-  transform: translateY(-1px);
+  background: #dff3e8;
+  border-color: #059669;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(9, 74, 37, 0.12);
 }
 
 .center-mini-count {
@@ -1601,11 +1740,29 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 .tag-badge.green { background: #dcfce7; color: #166534; }
 .tag-badge.purple { background: #f3e8ff; color: #6b21a8; }
 .tag-badge.blue { background: #dbeafe; color: #1e40af; }
+.tag-badge.red { background: #fee2e2; color: #b91c1c; }
+.tag-badge.gold { background: #fef3c7; color: #b45309; }
 
 .html-snippet { max-width: 250px; max-height: 60px; overflow: hidden; font-size: 0.8rem; opacity: 0.8; }
 .table-img { width: 50px; height: 35px; object-fit: cover; border-radius: 4px; }
 .btn-primary { background: #094A25; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-sm { padding: 0.35rem 0.7rem; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; margin-right: 0.4rem; }
+.btn-sm {
+  padding: 6px 0.7rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 5px;
+  margin-right: 0.4rem;
+  width: 110px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
 .btn-sm.edit { background: #fef3c7; color: #92400e; }
 .btn-sm.delete { background: #fee2e2; color: #991b1b; }
 
@@ -1628,6 +1785,10 @@ const deleteContact = async (id) => { if (confirm("Delete inquiry?")) { await co
 /* Modal */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-content { background: #fff; width: 100%; max-width: 650px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+.modal-content--wide { max-width: 960px; max-height: 92vh; overflow-y: auto; }
+.btn-link-preview { background: none; border: none; color: #059669; font-weight: 700; font-size: 0.85rem; text-decoration: underline; cursor: pointer; padding: 0; }
+.status-summary { background: #f8fafc; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem; }
+.status-summary p { margin: 0.35rem 0; }
 .modal-header { padding: 1.25rem 1.5rem; background: #094A25; color: #fff; display: flex; justify-content: space-between; align-items: center; }
 .modal-header h3 { margin: 0; font-size: 1.15rem; }
 .modal-close { background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
