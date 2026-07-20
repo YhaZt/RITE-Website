@@ -95,12 +95,18 @@ onMounted(async () => {
 
 /* Hero Header */
 .centers-hero {
+  width: 80%;
+  margin: 0 auto;
   background: linear-gradient(135deg, #053018 0%, #0c3e21 100%);
   color: white;
   padding: 5.5rem 1.5rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-radius: 28px;
+  margin-bottom: 4rem;
+  overflow: hidden;
+  box-shadow: 0 20px 45px -15px rgba(5, 48, 24, 0.18);
 }
 
 .hero-content {

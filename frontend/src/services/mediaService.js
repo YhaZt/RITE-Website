@@ -16,8 +16,16 @@ export const mediaService = {
   async uploadImage(file) {
     const formData = new FormData();
     formData.append('file', file);
+    // Let the browser set multipart boundary — do not force Content-Type
     const res = await http.post('/media', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': undefined },
+      transformRequest: [(data, headers) => {
+        if (headers && typeof headers === 'object') {
+          delete headers['Content-Type'];
+          delete headers['content-type'];
+        }
+        return data;
+      }],
     });
     return res.data;
   },

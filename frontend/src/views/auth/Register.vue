@@ -5,7 +5,6 @@
         <h2 class="auth-title">Register</h2>
         <p class="auth-subtitle">Create a new RITE account</p>
 
-        <!-- Errors Alert -->
         <div v-if="errors && errors.length" class="error-alert">
           <ul>
             <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
@@ -39,29 +38,73 @@
 
           <div class="form-group">
             <label for="password" class="form-label">Password</label>
-            <input
-              id="password"
-              type="password"
-              v-model="form.password"
-              required
-              class="form-input"
-              placeholder="••••••••"
-            />
+            <div class="password-field">
+              <input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="form.password"
+                required
+                minlength="8"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="eye-btn"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                @click="showPassword = !showPassword"
+              >
+                <svg v-if="!showPassword" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="password_confirmation" class="form-label">Confirm Password</label>
-            <input
-              id="password_confirmation"
-              type="password"
-              v-model="form.password_confirmation"
-              required
-              class="form-input"
-              placeholder="••••••••"
-            />
+            <div class="password-field">
+              <input
+                id="password_confirmation"
+                :type="showConfirm ? 'text' : 'password'"
+                v-model="form.password_confirmation"
+                required
+                minlength="8"
+                class="form-input"
+                :class="confirmClass"
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="eye-btn"
+                :aria-label="showConfirm ? 'Hide password' : 'Show password'"
+                @click="showConfirm = !showConfirm"
+              >
+                <svg v-if="!showConfirm" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </button>
+            </div>
+            <p v-if="matchHint" class="match-hint" :class="matchHintClass">{{ matchHint }}</p>
           </div>
 
-          <button type="submit" :disabled="submitting" class="submit-btn">
+          <button type="submit" :disabled="submitting || !passwordsMatch" class="submit-btn">
             <span v-if="submitting">Creating…</span>
             <span v-else>Create account</span>
           </button>
@@ -76,13 +119,15 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 
 const router = useRouter();
 const { register, errors } = useAuth();
 
+const showPassword = ref(false);
+const showConfirm = ref(false);
 const form = ref({
   name: "",
   email: "",
@@ -91,11 +136,31 @@ const form = ref({
 });
 const submitting = ref(false);
 
+const passwordsMatch = computed(() => {
+  if (!form.value.password_confirmation) return false;
+  return form.value.password === form.value.password_confirmation;
+});
+
+const matchHint = computed(() => {
+  if (!form.value.password_confirmation) return "";
+  return passwordsMatch.value ? "Passwords match" : "Passwords do not match";
+});
+
+const matchHintClass = computed(() =>
+  passwordsMatch.value ? "match-ok" : "match-bad"
+);
+
+const confirmClass = computed(() => {
+  if (!form.value.password_confirmation) return "";
+  return passwordsMatch.value ? "input-ok" : "input-bad";
+});
+
 const handleSubmit = async () => {
+  if (!passwordsMatch.value) return;
   submitting.value = true;
   try {
     await register(form.value);
-    router.push("/");
+    router.push("/login");
   } catch (err) {
     console.error("Registration failed:", err);
   } finally {
@@ -125,7 +190,6 @@ const handleSubmit = async () => {
   padding: 2.5rem;
   border: 1px solid rgba(9, 74, 37, 0.08);
   box-shadow: 0 10px 30px rgba(9, 74, 37, 0.04), 0 1px 8px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-title {
@@ -158,13 +222,8 @@ const handleSubmit = async () => {
   font-size: 0.9rem;
 }
 
-.error-alert li {
-  margin-bottom: 0.25rem;
-}
-
-.error-alert li:last-child {
-  margin-bottom: 0;
-}
+.error-alert li { margin-bottom: 0.25rem; }
+.error-alert li:last-child { margin-bottom: 0; }
 
 .auth-form {
   display: flex;
@@ -193,12 +252,55 @@ const handleSubmit = async () => {
   font-size: 0.95rem;
   color: #1a202c;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
   border-color: #094A25;
   box-shadow: 0 0 0 3px rgba(9, 74, 37, 0.15);
 }
+
+.form-input.input-ok {
+  border-color: #16a34a;
+}
+
+.form-input.input-bad {
+  border-color: #dc2626;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field .form-input {
+  padding-right: 2.75rem;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-btn:hover { color: #094A25; }
+
+.match-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.match-ok { color: #16a34a; }
+.match-bad { color: #dc2626; }
 
 .submit-btn {
   width: 100%;
@@ -210,19 +312,12 @@ const handleSubmit = async () => {
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
   box-shadow: 0 4px 12px rgba(9, 74, 37, 0.2);
   margin-top: 0.5rem;
 }
 
-.submit-btn:hover {
-  background: #07381b;
-}
-
-.submit-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
+.submit-btn:hover { background: #07381b; }
+.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .auth-links {
   display: flex;
@@ -235,7 +330,6 @@ const handleSubmit = async () => {
   color: #094A25;
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
 }
 
 .auth-link:hover {
@@ -244,8 +338,6 @@ const handleSubmit = async () => {
 }
 
 @media (max-width: 480px) {
-  .auth-card {
-    padding: 1.5rem;
-  }
+  .auth-card { padding: 1.5rem; }
 }
 </style>

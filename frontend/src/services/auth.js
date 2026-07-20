@@ -7,7 +7,11 @@ export async function getUser() {
 
 export async function login({ email, password, remember }) {
   await csrf();
-  const res = await http.post("/login", { email, password, remember });
+  const res = await http.post("/login", {
+    email,
+    password,
+    remember: !!remember,
+  });
   return res.data?.user || getUser();
 }
 

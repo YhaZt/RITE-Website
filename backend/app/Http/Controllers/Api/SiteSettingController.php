@@ -40,20 +40,20 @@ class SiteSettingController extends Controller
     /**
      * Show single setting by key.
      */
-    public function show(string $key)
+    public function show(string $setting)
     {
-        $setting = SiteSetting::where('key', $key)->first();
-        return response()->json($setting ? ['key' => $setting->key, 'value' => $setting->value] : null);
+        $row = SiteSetting::where('key', $setting)->first();
+        return response()->json($row ? ['key' => $row->key, 'value' => $row->value] : null);
     }
 
     /**
      * Remove setting by key.
      */
-    public function destroy(string $key)
+    public function destroy(string $setting)
     {
-        $setting = SiteSetting::where('key', $key)->first();
-        if ($setting) {
-            $setting->delete();
+        $row = SiteSetting::where('key', $setting)->first();
+        if ($row) {
+            $row->delete();
         }
         return response()->json(['message' => 'Setting removed successfully']);
     }

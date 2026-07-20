@@ -1,124 +1,13 @@
 <template>
   <main class="page-container">
-    <!-- Split Hero Section -->
-    <section class="hero-section">
-      <div class="hero-inner">
-        <div class="hero-grid">
-          <div class="hero-left">
-            <span class="hero-badge">Mindoro State University</span>
-            <h1 class="hero-title">
-              Research, Innovation &amp; Technology Extension
-            </h1>
-            <p class="hero-description">
-              Advancing regional knowledge, fostering community-driven solutions, and driving technology commercialization for inclusive sustainable growth.
-            </p>
-            <div class="hero-actions">
-              <router-link to="/about" class="btn btn-primary">Discover Our Mission</router-link>
-              <router-link to="/centers" class="btn btn-secondary">Explore Research Centers</router-link>
-            </div>
-          </div>
-
-          <div class="hero-right">
-            <div class="hero-widget-layout">
-              <div class="hero-big-stack">
-                <div v-for="card in heroBigCards" :key="card.id" class="hero-big-card">
-                  <div class="hero-big-card-head">
-                    <h4>Inquiries by Unit</h4>
-                    <span>All time</span>
-                  </div>
-                  <div class="hero-big-card-body">
-                    <p class="hero-big-card-empty">No inquiry data yet</p>
-                  </div>
-                </div>
-              </div>
-              <div class="hero-small-stack">
-                <div v-for="card in heroSmallCards" :key="card.id" class="hero-small-card">
-                  <div class="hero-small-card-content">
-                    <span class="hero-small-card-label">{{ card.label }}</span>
-                    <strong class="hero-small-card-value">{{ card.value }}</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Full-width public analytics strip -->
-        <div class="rite-pulse-panel" aria-live="polite">
-          <div class="rite-pulse-head">
-            <div>
-              <h3>RITE Pulse</h3>
-              <p>Public institutional metrics — safe to display, updated in near real-time</p>
-            </div>
-            <div class="rite-pulse-meta">
-              <span class="live-dot" aria-hidden="true"></span>
-              <span class="rite-pulse-updated">Updated {{ publicMetricsUpdatedLabel }}</span>
-            </div>
-          </div>
-
-          <div class="rite-pulse-stats">
-            <div v-for="stat in pulseStats" :key="stat.id" class="pulse-stat">
-              <span class="pulse-stat-label">{{ stat.label }}</span>
-              <strong class="pulse-stat-value">{{ stat.value }}</strong>
-            </div>
-          </div>
-
-          <div class="rite-pulse-charts">
-            <div class="pulse-chart-card pulse-chart-wide">
-              <div class="pulse-chart-head">
-                <h4>Inquiry Activity</h4>
-                <span>Last 14 days</span>
-              </div>
-              <svg class="pulse-svg" viewBox="0 0 360 100" preserveAspectRatio="none" role="img" aria-label="Inquiry activity line chart">
-                <polyline v-if="trendLinePoints" :points="trendLinePoints" fill="none" stroke="rgba(16,185,129,0.2)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
-                <polyline v-if="trendLinePoints" :points="trendLinePoints" fill="none" stroke="#094A25" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <div class="pulse-chart-foot">
-                <span>Total: {{ pmTotal }}</span>
-                <span>Avg/day: {{ pmAvg }}</span>
-              </div>
-            </div>
-
-            <div class="pulse-chart-card">
-              <div class="pulse-chart-head">
-                <h4>Inquiries by Unit</h4>
-                <span>All time</span>
-              </div>
-              <div class="pulse-bars">
-                <div v-for="bar in unitBars" :key="bar.label" class="pulse-bar-col">
-                  <div class="pulse-bar-track">
-                    <div class="pulse-bar-fill" :style="{ height: bar.pct + '%' }"></div>
-                  </div>
-                  <span class="pulse-bar-val">{{ bar.count }}</span>
-                  <span class="pulse-bar-label">{{ bar.shortLabel }}</span>
-                </div>
-                <p v-if="!unitBars.length" class="pulse-empty">No inquiry data yet</p>
-              </div>
-            </div>
-
-            <div class="pulse-chart-card">
-              <div class="pulse-chart-head">
-                <h4>Partner Categories</h4>
-                <span>Distribution</span>
-              </div>
-              <div class="pulse-donut-layout">
-                <div class="pulse-donut" :style="{ background: statusDonutGradient }">
-                  <div class="pulse-donut-hole">
-                    <strong>{{ statusDonutTotal }}</strong>
-                    <span>Total</span>
-                  </div>
-                </div>
-                <ul class="pulse-legend">
-                  <li v-for="seg in statusSegments" :key="seg.label">
-                    <span class="pulse-legend-dot" :style="{ background: seg.color }"></span>
-                    <span>{{ seg.label }}</span>
-                    <strong>{{ seg.count }}</strong>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- Public overview first -->
+    <section class="overview-section">
+      <div class="overview-inner">
+        <PublicDashboard
+          :layout="homepageLayout"
+          :metrics="publicMetrics"
+          :updated-at="publicMetricsUpdatedAt"
+        />
       </div>
     </section>
 
@@ -199,16 +88,23 @@
           <h2>Latest Updates</h2>
           <div class="section-line"></div>
         </div>
-        <a href="https://www.facebook.com/profile.php?id=61554793640385" target="_blank" rel="noopener noreferrer" class="link-more-facebook">
-          View all on Facebook <span class="arrow-symbol">→</span>
-        </a>
+        <router-link to="/news" class="link-more-facebook">
+          View all news <span class="arrow-symbol">→</span>
+        </router-link>
       </div>
 
       <div class="news-grid">
-        <article v-for="item in homeNewsItems" :key="item.id" class="news-card">
-          <a :href="item.link" target="_blank" rel="noopener noreferrer" class="news-card-link">
+        <article v-for="item in homeNewsItems.slice(0, 6)" :key="item.id" class="news-card">
+          <router-link :to="`/news/${item.id}`" class="news-card-link">
             <div class="news-image-wrapper">
-              <img :src="resolveImageUrl(item.image)" :alt="item.title" loading="lazy" class="news-img" />
+              <img
+                v-if="item.image"
+                :src="resolveImageUrl(item.image)"
+                :alt="item.title"
+                loading="lazy"
+                class="news-img"
+                @error="($e) => ($e.target.style.display = 'none')"
+              />
               <span class="news-category-badge">{{ item.category }}</span>
             </div>
             <div class="news-content">
@@ -216,7 +112,7 @@
               <h3 class="news-title">{{ item.title }}</h3>
               <p class="news-desc">{{ newsTeaser(item.description) }}</p>
             </div>
-          </a>
+          </router-link>
         </article>
       </div>
     </section>
@@ -225,16 +121,18 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { homeCarouselSlides as staticSlides, homeFeatureCards, homePageOverviews, homeNewsItems as staticNews } from "@/data/siteData";
-import { carouselService } from "@/services/carouselService";
+import { homeFeatureCards, homePageOverviews } from "@/data/siteData";
 import { newsService } from "@/services/newsService";
 import { publicMetricsService } from "@/services/publicMetricsService";
+import { homepageLayoutService } from "@/services/homepageLayoutService";
 import { resolveStorageUrl } from "@/services/mediaService";
+import { defaultLayout } from "@/publicHomepage/widgetRegistry";
+import PublicDashboard from "@/components/publicHomepage/PublicDashboard.vue";
 
-const homeCarouselSlides = ref(staticSlides);
-const homeNewsItems = ref(staticNews);
+const homeNewsItems = ref([]);
 const publicMetrics = ref(null);
 const publicMetricsUpdatedAt = ref(null);
+const homepageLayout = ref(defaultLayout());
 
 let publicMetricsInterval = null;
 
@@ -266,168 +164,43 @@ const resetSpotlightInterval = () => {
 };
 
 onMounted(async () => {
-  // Fetch dynamic data from Laravel Backend API
-  try {
-    const slidesData = await carouselService.getAll();
-    if (slidesData && slidesData.length > 0) {
-      homeCarouselSlides.value = slidesData;
-    }
-  } catch (e) {
-    console.warn("Using static carousel slides fallback", e);
-  }
-
   try {
     const newsData = await newsService.getAll();
-    if (newsData && newsData.length > 0) {
-      homeNewsItems.value = newsData;
-    }
+    homeNewsItems.value = Array.isArray(newsData) ? newsData : [];
   } catch (e) {
-    console.warn("Using static news fallback", e);
+    console.warn("News load failed", e);
+    homeNewsItems.value = [];
   }
 
   // Start Spotlight Auto Slider
   resetSpotlightInterval();
 
-  const loadPublicMetrics = async () => {
+  const loadPublicDashboard = async () => {
     try {
-      const data = await publicMetricsService.get();
-      publicMetrics.value = data;
-      publicMetricsUpdatedAt.value = data?.generated_at ? new Date(data.generated_at) : new Date();
+      const metricsData = await publicMetricsService.get();
+      publicMetrics.value = metricsData;
+      publicMetricsUpdatedAt.value = metricsData?.generated_at
+        ? new Date(metricsData.generated_at)
+        : new Date();
     } catch (e) {
-      // Keep UI stable; public chart is non-critical
+      console.warn('Public metrics failed', e);
       if (!publicMetricsUpdatedAt.value) publicMetricsUpdatedAt.value = new Date();
+    }
+    try {
+      const layoutData = await homepageLayoutService.getPublic();
+      if (layoutData) homepageLayout.value = layoutData;
+    } catch (e) {
+      console.warn('Homepage layout failed — using defaults', e);
     }
   };
 
-  await loadPublicMetrics();
-  publicMetricsInterval = setInterval(loadPublicMetrics, 30000);
+  await loadPublicDashboard();
+  publicMetricsInterval = setInterval(loadPublicDashboard, 30000);
 });
 
 onUnmounted(() => {
   if (spotlightInterval) clearInterval(spotlightInterval);
   if (publicMetricsInterval) clearInterval(publicMetricsInterval);
-});
-
-const publicMetricsUpdatedLabel = computed(() => {
-  if (!publicMetricsUpdatedAt.value) return "just now";
-  return publicMetricsUpdatedAt.value.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-});
-
-const pulseCounters = computed(() => {
-  const c = publicMetrics.value?.counters;
-  return {
-    research_centers: c?.research_centers ?? 9,
-    ecosystem_partners: c?.ecosystem_partners ?? 0,
-    news_items: c?.news_items ?? homeNewsItems.value.length,
-    carousel_slides: c?.carousel_slides ?? homeCarouselSlides.value.length,
-    total_inquiries: c?.total_inquiries ?? 0,
-  };
-});
-
-const pulseStats = computed(() => [
-  { id: "centers", label: "Research Centers", value: pulseCounters.value.research_centers },
-  { id: "partners", label: "Ecosystem Partners", value: pulseCounters.value.ecosystem_partners },
-  { id: "news", label: "News & Events", value: pulseCounters.value.news_items },
-  { id: "carousel", label: "Hero Initiatives", value: pulseCounters.value.carousel_slides },
-  { id: "inquiries", label: "Total Inquiries", value: pulseCounters.value.total_inquiries },
-]);
-
-const pmSeries = computed(() => publicMetrics.value?.series?.submissions_last_14_days || []);
-const pmTotal = computed(() => pmSeries.value.reduce((acc, p) => acc + (p.count || 0), 0));
-const pmAvg = computed(() => {
-  if (!pmSeries.value.length) return "0.0";
-  return (pmTotal.value / pmSeries.value.length).toFixed(1);
-});
-
-const buildLinePoints = (points, w = 360, h = 100) => {
-  if (!points || points.length < 2) return "";
-  const padX = 6;
-  const padY = 8;
-  const max = Math.max(...points.map((p) => p.count || 0), 1);
-  return points
-    .map((p, i) => {
-      const x = padX + (i * (w - padX * 2)) / (points.length - 1);
-      const y = h - padY - ((p.count || 0) * (h - padY * 2)) / max;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-};
-
-const trendLinePoints = computed(() => buildLinePoints(pmSeries.value));
-
-const heroBigCards = [{ id: "inquiry-1" }, { id: "inquiry-2" }, { id: "inquiry-3" }];
-
-const heroSmallCards = computed(() => {
-  const metrics = [
-    { id: "centers", label: "RESEARCH CENTERS", value: pulseCounters.value.research_centers },
-    { id: "partners", label: "ECOSYSTEM PARTNERS", value: pulseCounters.value.ecosystem_partners },
-    { id: "news", label: "NEWS & EVENTS", value: pulseCounters.value.news_items },
-    { id: "hero", label: "HERO INITIATIVES", value: pulseCounters.value.carousel_slides },
-    { id: "inquiries", label: "TOTAL INQUIRIES", value: pulseCounters.value.total_inquiries },
-  ];
-  const cards = [...metrics];
-  while (cards.length < 7) {
-    cards.push({
-      id: `pad-${cards.length}`,
-      label: "ECOSYSTEM PARTNERS",
-      value: pulseCounters.value.ecosystem_partners,
-    });
-  }
-  return cards.slice(0, 7);
-});
-
-const unitBars = computed(() => {
-  const rows = publicMetrics.value?.breakdowns?.inquiries_by_unit || [];
-  const max = Math.max(...rows.map((r) => r.count), 1);
-  return rows.map((r) => ({
-    label: r.label,
-    shortLabel: r.label.replace("Publication & Printing", "Pub. & Print").replace("Research Centers", "Centers"),
-    count: r.count,
-    pct: Math.max(10, Math.round((r.count / max) * 100)),
-  }));
-});
-
-const STATUS_COLORS = { Pending: "#094A25", Completed: "#22c55e" };
-const ECOSYSTEM_COLORS = ["#094A25", "#22c55e", "#0ea5e9", "#eab308", "#8b5cf6"];
-
-const inquiryStatus = computed(() => publicMetrics.value?.breakdowns?.inquiry_status || []);
-const ecosystemCats = computed(() => publicMetrics.value?.breakdowns?.ecosystem_categories || []);
-
-const statusChartTitle = computed(() =>
-  inquiryStatus.value.some((s) => s.count > 0) ? "Inquiry Status" : "Partner Categories"
-);
-
-const statusSegments = computed(() => {
-  const source = ecosystemCats.value;
-
-  if (!source.length) {
-    return [
-      { label: "Partners", count: pulseCounters.value.ecosystem_partners, color: "#094A25", pct: 100 },
-    ];
-  }
-
-  const total = source.reduce((acc, s) => acc + s.count, 0) || 1;
-  return source.map((s, i) => ({
-    label: s.label,
-    count: s.count,
-    color: STATUS_COLORS[s.label] || ECOSYSTEM_COLORS[i % ECOSYSTEM_COLORS.length],
-    pct: Math.round((s.count / total) * 100),
-  }));
-});
-
-const statusDonutTotal = computed(() =>
-  statusSegments.value.reduce((acc, s) => acc + s.count, 0)
-);
-
-const statusDonutGradient = computed(() => {
-  let cursor = 0;
-  const parts = statusSegments.value.map((seg, i, arr) => {
-    const start = cursor;
-    cursor += seg.pct;
-    const end = i === arr.length - 1 ? 100 : cursor;
-    return `${seg.color} ${start}% ${end}%`;
-  });
-  return `conic-gradient(${parts.join(", ")})`;
 });
 </script>
 
@@ -440,10 +213,15 @@ const statusDonutGradient = computed(() => {
 }
 
 /* Split Hero Styles */
-.hero-section {
-  padding: 3.5rem 1.25rem 2.5rem;
+.overview-section {
+  padding: 1.5rem 1.25rem 2rem;
   background: linear-gradient(135deg, #f0fdf4 0%, #e6f7ed 100%);
   border-bottom: 1px solid rgba(9, 74, 37, 0.05);
+}
+
+.overview-inner {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hero-inner {
@@ -543,6 +321,43 @@ const statusDonutGradient = computed(() => {
 
 .hero-right {
   position: relative;
+}
+
+.hero-right--visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-visual-card {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #094A25 0%, #0d9488 100%);
+  color: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  box-shadow: 0 20px 40px -18px rgba(9, 74, 37, 0.45);
+}
+
+.hero-visual-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.85;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-visual-text {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .hero-widget-layout {

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\OrgMemberController;
 use App\Http\Controllers\Api\EcosystemController;
 use App\Http\Controllers\Api\UnitSubmissionController;
 use App\Http\Controllers\Api\PublicMetricsController;
+use App\Http\Controllers\Api\PublicHomepageLayoutController;
 use App\Http\Controllers\Api\MediaController;
 
 // Auth Routes
@@ -35,3 +36,4 @@ Route::post('media', [MediaController::class, 'store']);
 
 // Public-safe dashboard metrics (cached, no auth required)
 Route::get('/public/metrics', [PublicMetricsController::class, 'index']);
+Route::get('/public/homepage-layout', [PublicHomepageLayoutController::class, 'index']);

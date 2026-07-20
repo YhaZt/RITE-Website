@@ -153,44 +153,7 @@ export const homePageOverviews = [
   },
 ];
 
-export const homeNewsItems = [
-  {
-    id: 1,
-    category: "Announcement",
-    title: "𝐂𝐀𝐋𝐋 𝐅𝐎𝐑 𝐏𝐀𝐑𝐓𝐈𝐂𝐈𝐏𝐀𝐍𝐓𝐒 & 𝐏𝐀𝐏𝐄𝐑 𝐏𝐑𝐄𝐒𝐄𝐍𝐓𝐄𝐑𝐒",
-    description: "Mindoro State University, through the Research, Innovation, Technology, and Extension (RITE) Department, proudly invites scholars, educators, practitioners, and advocates to the GLOBAL ISLANDS CONFERENCE 2026 (GIC 2026). Platform: ZOOM ,Registration Fee:PHP 500 , paper presenters will reciece a certificate of presentation Paper Submission Deadline: May 29, 2026",
-    date: "june 5 - 6, 2026",
-    image: "/globalislands.jpg",
-    link: "https://www.facebook.com/photo?fbid=2375990646217537&set=a.725405664609385",
-  },
-  {
-    id: 2,
-    category: "Event",
-    title: "Upcoming webinar: IP basics for researchers",
-    description: "A short orientation on invention disclosure, copyrights, and patent fundamentals.",
-    date: "May 20, 2026",
-    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=800&fit=crop",
-    link: "https://omsc.edu.ph/news",
-  },
-  {
-    id: 3,
-    category: "Update",
-    title: "New forms now available for download",
-    description: "Updated templates for disclosures and agreements are now posted for easier submission.",
-    date: "May 10, 2026",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&h=800&fit=crop",
-    link: "https://omsc.edu.ph/news",
-  },
-  {
-    id: 4,
-    category: "Partnership",
-    title: "New collaboration opportunities opened",
-    description: "We’re welcoming partner institutions for joint research and extension initiatives.",
-    date: "May 3, 2026",
-    image: "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=1200&h=800&fit=crop",
-    link: "https://omsc.edu.ph/news",
-  },
-];
+export const homeNewsItems = [];
 
 // 4. About Page Content
 export const aboutContent = {

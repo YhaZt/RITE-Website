@@ -5,60 +5,66 @@
       <span class="article-progress-label">{{ progressPercent }}% Complete</span>
     </div>
 
-    <div class="article-top-row">
-      <div class="article-title-group">
-        <label>Article Title <span class="required">*</span></label>
-        <input
-          :value="title"
-          type="text"
-          maxlength="500"
-          placeholder="Enter a compelling title..."
-          @input="$emit('update:title', $event.target.value)"
-        />
-        <span class="char-count">{{ title.length }} / 500</span>
-      </div>
-      <div class="article-date-group">
-        <label>Publication Date</label>
-        <input
-          :value="dateIso"
-          type="date"
-          @input="$emit('update:dateIso', $event.target.value)"
-        />
-      </div>
-      <div class="article-stats">
-        <div><strong>{{ wordCount }}</strong> Words</div>
-        <div><strong>{{ readMinutes }}</strong> Min Read</div>
-      </div>
-    </div>
+    <div class="article-layout">
+      <div class="article-main-col">
+        <div class="article-title-group">
+          <label>Article Title <span class="required">*</span></label>
+          <input
+            :value="title"
+            type="text"
+            maxlength="500"
+            placeholder="Enter a compelling title..."
+            @input="$emit('update:title', $event.target.value)"
+          />
+          <span class="char-count">{{ title.length }} / 500</span>
+        </div>
 
-    <div class="article-meta-row">
-      <div class="form-group">
-        <label>Category <span class="required">*</span></label>
-        <select :value="category" @change="$emit('update:category', $event.target.value)">
-          <option value="Announcement">Announcement</option>
-          <option value="Event">Event</option>
-          <option value="Research">Research</option>
-          <option value="Extension">Extension</option>
-          <option value="Innovation">Innovation</option>
-        </select>
+        <div class="article-meta-row">
+          <div class="form-group">
+            <label>Category <span class="required">*</span></label>
+            <select :value="category" @change="$emit('update:category', $event.target.value)">
+              <option value="Announcement">Announcement</option>
+              <option value="Event">Event</option>
+              <option value="Research">Research</option>
+              <option value="Extension">Extension</option>
+              <option value="Innovation">Innovation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tags</label>
+            <input
+              :value="tags"
+              type="text"
+              placeholder="e.g. research, extension, innovation"
+              @input="$emit('update:tags', $event.target.value)"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>External Link (optional)</label>
+          <input
+            :value="link"
+            type="url"
+            placeholder="https://..."
+            @input="$emit('update:link', $event.target.value)"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label>Tags</label>
-        <input
-          :value="tags"
-          type="text"
-          placeholder="e.g. research, extension, innovation"
-          @input="$emit('update:tags', $event.target.value)"
-        />
-      </div>
-      <div class="form-group">
-        <label>External Link (optional)</label>
-        <input
-          :value="link"
-          type="url"
-          placeholder="https://..."
-          @input="$emit('update:link', $event.target.value)"
-        />
+
+      <div class="article-side-col">
+        <div class="article-date-group">
+          <label>Publication Date</label>
+          <input
+            :value="dateIso"
+            type="date"
+            @input="$emit('update:dateIso', $event.target.value)"
+          />
+        </div>
+        <div class="article-stats">
+          <div><strong>{{ wordCount }}</strong> Words</div>
+          <div><strong>{{ readMinutes }}</strong> Min Read</div>
+        </div>
       </div>
     </div>
 
@@ -67,23 +73,72 @@
       <ImageUploadField :model-value="image" @update:model-value="$emit('update:image', $event)" />
     </div>
 
-    <div class="form-group">
+    <div class="form-group editor-section">
       <label>Article Content <span class="required">*</span></label>
+
+      <div class="media-tools">
+        <div class="media-fields">
+          <select v-model="mediaLayout" class="media-select" aria-label="Image layout">
+            <option value="full">Full width</option>
+            <option value="wide">Wide</option>
+            <option value="left">Left (wrap text)</option>
+            <option value="right">Right (wrap text)</option>
+          </select>
+          <input
+            v-model="mediaCaption"
+            type="text"
+            class="media-caption"
+            placeholder="Caption (optional)"
+          />
+        </div>
+        <div class="media-actions">
+          <button type="button" class="media-btn media-btn-primary" :disabled="mediaBusy" @click="triggerImagePick">
+            {{ mediaBusy ? 'Uploading…' : 'Insert Image' }}
+          </button>
+          <select v-model.number="galleryColumns" class="gallery-select" aria-label="Gallery columns">
+            <option :value="2">2 columns</option>
+            <option :value="3">3 columns</option>
+            <option :value="4">4 columns</option>
+          </select>
+          <button type="button" class="media-btn media-btn-outline" :disabled="mediaBusy" @click="triggerGalleryPick">
+            Insert Gallery
+          </button>
+        </div>
+      </div>
+      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Any image size is accepted — uploads are resized and converted to WebP on the server.</p>
+
+      <input
+        ref="imageInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        class="hidden-file"
+        @change="onImageFile"
+      />
+      <input
+        ref="galleryInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple
+        class="hidden-file"
+        @change="onGalleryFiles"
+      />
+
       <Editor
         v-model="contentModel"
         :init="editorInit"
         tinymce-script-src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js"
         license-key="gpl"
+        @init="onEditorInit"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import Editor from '@tinymce/tinymce-vue';
 import ImageUploadField from '@/components/ImageUploadField.vue';
-import { mediaService } from '@/services/mediaService';
+import { mediaService, resolveStorageUrl } from '@/services/mediaService';
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -104,6 +159,14 @@ const emit = defineEmits([
   'update:link',
   'update:description',
 ]);
+
+const editorInstance = ref(null);
+const imageInput = ref(null);
+const galleryInput = ref(null);
+const mediaLayout = ref('full');
+const mediaCaption = ref('');
+const galleryColumns = ref(3);
+const mediaBusy = ref(false);
 
 const contentModel = computed({
   get: () => props.description,
@@ -138,13 +201,29 @@ const apiBase = (
   'http://localhost:8000'
 ).replace(/\/api\/?$/, '');
 
+const contentCss = `
+  body { font-family: Outfit, Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #0f172a; }
+  .news-figure { margin: 1.25rem 0; clear: both; }
+  .news-figure img { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+  .news-figure figcaption { margin-top: 0.45rem; font-size: 0.85rem; color: #64748b; font-style: italic; text-align: center; }
+  .news-figure--left { float: left; width: 46%; margin: 0.35rem 1.25rem 0.85rem 0; }
+  .news-figure--right { float: right; width: 46%; margin: 0.35rem 0 0.85rem 1.25rem; }
+  .news-figure--wide { width: 100%; max-width: 100%; }
+  .news-figure--full { width: 100%; margin-left: 0; margin-right: 0; }
+  .news-gallery { display: grid; gap: 0.65rem; margin: 1.25rem 0; clear: both; }
+  .news-gallery--cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .news-gallery--cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .news-gallery--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .news-gallery img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; display: block; }
+`;
+
 const editorInit = {
   height: 420,
   menubar: false,
   plugins: 'lists link image code fullscreen table',
   toolbar:
-    'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist | link image | blockquote | removeformat | fullscreen',
-  content_style: 'body { font-family: Outfit, Arial, sans-serif; font-size: 15px; }',
+    'undo redo | blocks fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | blockquote hr | removeformat | fullscreen',
+  content_style: contentCss,
   branding: false,
   promotion: false,
   skin_url: 'https://cdn.jsdelivr.net/npm/tinymce@7/skins/ui/oxide',
@@ -154,6 +233,98 @@ const editorInit = {
     const { url } = await mediaService.uploadImage(file);
     return url.startsWith('http') ? url : `${apiBase}${url}`;
   },
+};
+
+const onEditorInit = (_evt, editor) => {
+  editorInstance.value = editor;
+};
+
+const absoluteUrl = (url) => {
+  const resolved = resolveStorageUrl(url);
+  if (resolved.startsWith('http')) return resolved;
+  return `${apiBase}${resolved.startsWith('/') ? resolved : `/${resolved}`}`;
+};
+
+const layoutClass = (layout) => {
+  const map = {
+    full: 'news-figure--full',
+    wide: 'news-figure--wide',
+    left: 'news-figure--left',
+    right: 'news-figure--right',
+  };
+  return map[layout] || 'news-figure--full';
+};
+
+const escapeHtml = (str) =>
+  String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+const insertHtml = (html) => {
+  const ed = editorInstance.value;
+  if (!ed) {
+    alert('Editor is still loading. Try again in a moment.');
+    return;
+  }
+  ed.focus();
+  ed.insertContent(html);
+};
+
+const buildFigureHtml = (imageUrl, caption, layout) => {
+  const cap = caption?.trim()
+    ? `<figcaption>${escapeHtml(caption.trim())}</figcaption>`
+    : '';
+  return `<figure class="news-figure ${layoutClass(layout)}"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(caption || '')}" />${cap}</figure><p></p>`;
+};
+
+const triggerImagePick = () => imageInput.value?.click();
+const triggerGalleryPick = () => galleryInput.value?.click();
+
+const onImageFile = async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (!file) return;
+  mediaBusy.value = true;
+  try {
+    const { url } = await mediaService.uploadImage(file);
+    insertHtml(buildFigureHtml(absoluteUrl(url), mediaCaption.value, mediaLayout.value));
+    mediaCaption.value = '';
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      'Failed to upload image.';
+    alert(msg);
+  } finally {
+    mediaBusy.value = false;
+  }
+};
+
+const onGalleryFiles = async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (!files.length) return;
+  mediaBusy.value = true;
+  try {
+    const urls = [];
+    for (const file of files) {
+      const { url } = await mediaService.uploadImage(file);
+      urls.push(absoluteUrl(url));
+    }
+    const cols = [2, 3, 4].includes(galleryColumns.value) ? galleryColumns.value : 3;
+    const imgs = urls.map((u) => `<img src="${escapeHtml(u)}" alt="" />`).join('');
+    insertHtml(`<div class="news-gallery news-gallery--cols-${cols}">${imgs}</div><p></p>`);
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      'Failed to upload gallery images.';
+    alert(msg);
+  } finally {
+    mediaBusy.value = false;
+  }
 };
 </script>
 
@@ -193,23 +364,37 @@ const editorInit = {
   color: #0f172a;
 }
 
-.article-top-row {
+.article-layout {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1.6fr 0.9fr;
   gap: 1rem;
   align-items: start;
+}
+
+.article-main-col,
+.article-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .article-title-group {
   position: relative;
 }
 
-.article-title-group input {
+.article-title-group input,
+.article-date-group input,
+.form-group input,
+.form-group select,
+.media-select,
+.media-caption,
+.gallery-select {
   width: 100%;
   padding: 0.65rem 0.75rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  box-sizing: border-box;
 }
 
 .char-count {
@@ -220,18 +405,12 @@ const editorInit = {
   color: #94a3b8;
 }
 
-.article-date-group input {
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-}
-
 .article-stats {
   display: flex;
   gap: 1rem;
   background: #f1f5f9;
   border-radius: 10px;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   font-size: 0.8rem;
   color: #64748b;
   text-align: center;
@@ -245,11 +424,13 @@ const editorInit = {
 
 .article-meta-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
 }
 
-.form-group label {
+.form-group label,
+.article-title-group label,
+.article-date-group label {
   display: block;
   font-size: 0.85rem;
   font-weight: 600;
@@ -257,22 +438,74 @@ const editorInit = {
   color: #334155;
 }
 
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #cbd5e1;
+.required { color: #dc2626; }
+
+.editor-section { margin-top: 0.25rem; }
+
+.media-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.media-fields {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0.6rem;
+}
+
+.media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.gallery-select {
+  width: auto;
+  min-width: 120px;
+}
+
+.media-btn {
   border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
 }
 
-.required {
-  color: #dc2626;
+.media-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-@media (max-width: 900px) {
-  .article-top-row,
-  .article-meta-row {
-    grid-template-columns: 1fr;
-  }
+.media-btn-primary {
+  background: #094A25;
+  color: #fff;
+}
+
+.media-btn-outline {
+  background: #fff;
+  color: #094A25;
+  border: 1px solid rgba(9, 74, 37, 0.35);
+}
+
+.media-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.hidden-file { display: none; }
+
+@media (max-width: 800px) {
+  .article-layout { grid-template-columns: 1fr; }
+  .media-fields { grid-template-columns: 1fr; }
 }
 </style>

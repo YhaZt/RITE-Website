@@ -26,7 +26,7 @@
           <path d="M21 15l-5-5L5 21" />
         </svg>
         <p><strong>Drop image here</strong> or click to browse</p>
-        <span>JPEG, PNG, WebP, GIF — max 5 MB</span>
+        <span>JPEG, PNG, WebP, GIF — saved as WebP (any size; auto-resized)</span>
       </div>
       <div v-if="uploading" class="dropzone-loading">Uploading…</div>
     </div>
@@ -82,10 +82,7 @@ const triggerBrowse = () => fileInput.value?.click();
 
 const handleFile = async (file) => {
   if (!file || !file.type.startsWith('image/')) return;
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image must be under 5 MB.');
-    return;
-  }
+  // No client size hard-block — server resizes + converts to WebP (max 50 MB)
 
   if (objectUrl.value) URL.revokeObjectURL(objectUrl.value);
   objectUrl.value = URL.createObjectURL(file);
@@ -100,8 +97,13 @@ const handleFile = async (file) => {
       objectUrl.value = '';
     }
     previewUrl.value = resolveStorageUrl(url);
-  } catch {
-    alert('Failed to upload image.');
+  } catch (err) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      (err?.response?.status === 413 ? 'Image is too large for the server.' : null) ||
+      'Failed to upload image.';
+    alert(msg);
     previewUrl.value = props.modelValue ? resolveStorageUrl(props.modelValue) : '';
   } finally {
     uploading.value = false;

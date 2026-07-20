@@ -36,6 +36,9 @@
         <button :class="{ active: activeTab === 'submissions' }" @click="activeTab = 'submissions'">
           <svg class="nav-svg" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> Unit Submissions
         </button>
+        <button :class="{ active: activeTab === 'manage-public-homepage' }" @click="activeTab = 'manage-public-homepage'">
+          <svg class="nav-svg" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Public Homepage
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -518,6 +521,11 @@
           </div>
         </div>
       </div>
+
+      <!-- TAB: MANAGE PUBLIC HOMEPAGE -->
+      <div v-if="activeTab === 'manage-public-homepage'" class="tab-content">
+        <ManagePublicHomepage />
+      </div>
     </div>
 
     <!-- UNIVERSAL MODAL DIALOG WITH WYSIWYG EDITOR -->
@@ -717,6 +725,7 @@ import {
 import ArticleEditor from '@/components/ArticleEditor.vue';
 import ImageUploadField from '@/components/ImageUploadField.vue';
 import FilePreviewModal from '@/components/FilePreviewModal.vue';
+import ManagePublicHomepage from '@/components/publicHomepage/ManagePublicHomepage.vue';
 
 const ecosystemPresetUrls = [
   'https://tucst.edu.vn/icon/logo_dhvh.jpg',
@@ -1012,7 +1021,8 @@ const getTabTitle = () => {
     ecosystem: 'Manage RITE Ecosystem Directory',
     org: 'Manage Organizational Structure',
     contact: 'Manage Received Contact Messages',
-    submissions: 'Manage Research, Printing & Center Submissions'
+    submissions: 'Manage Research, Printing & Center Submissions',
+    'manage-public-homepage': 'Manage Public Homepage Dashboard',
   };
   return titles[activeTab.value] || 'Admin Console';
 };

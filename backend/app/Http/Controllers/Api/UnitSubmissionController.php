@@ -116,6 +116,10 @@ class UnitSubmissionController extends Controller
             abort(404, 'File not found');
         }
 
-        return Storage::disk('public')->response($relative);
+        $absolutePath = Storage::disk('public')->path($relative);
+
+        return response()->file($absolutePath, [
+            'Content-Disposition' => 'inline; filename="' . basename($relative) . '"',
+        ]);
     }
 }

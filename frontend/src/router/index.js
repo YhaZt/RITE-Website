@@ -108,6 +108,16 @@ const routes = [
     component: () => import("../views/Contact.vue"),
   },
   {
+    path: "/news",
+    name: "NewsAll",
+    component: () => import("../views/NewsAll.vue"),
+  },
+  {
+    path: "/news/:id",
+    name: "NewsDetail",
+    component: () => import("../views/NewsDetail.vue"),
+  },
+  {
     path: "/admin",
     name: "AdminDashboard",
     component: () => import("../views/AdminDashboard.vue"),
