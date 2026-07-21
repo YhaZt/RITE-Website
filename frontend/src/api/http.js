@@ -8,6 +8,19 @@ const baseURL =
 const apiRoot = baseURL.endsWith("/api") ? baseURL.slice(0, -4) : baseURL;
 const apiBase = baseURL.endsWith("/api") ? baseURL : `${baseURL}/api`;
 
+function readCookie(name) {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name.replace(/([$()*+.?[\\\]^{|}])/g, "\\$1")}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/** Apply Laravel XSRF cookie onto the axios instance used for API calls. */
+function syncXsrfHeader() {
+  const token = readCookie("XSRF-TOKEN");
+  if (token) {
+    http.defaults.headers.common["X-XSRF-TOKEN"] = token;
+  }
+}
+
 const shared = {
   withCredentials: true,
   withXSRFToken: true,
@@ -33,4 +46,5 @@ export async function csrf() {
   await axios.get(`${apiRoot}/sanctum/csrf-cookie`, {
     ...shared,
   });
+  syncXsrfHeader();
 }
