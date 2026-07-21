@@ -9,19 +9,24 @@ const apiRoot = baseURL.endsWith("/api") ? baseURL.slice(0, -4) : baseURL;
 const apiBase = baseURL.endsWith("/api") ? baseURL : `${baseURL}/api`;
 
 function readCookie(name) {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name.replace(/([$()*+.?[\\\]^{|}])/g, "\\$1")}=([^;]*)`));
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name.replace(/([$()*+.?[\\\]^{|}])/g, "\\$1")}=([^;]*)`)
+  );
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Apply Laravel XSRF cookie onto the axios instance used for API calls. */
-function syncXsrfHeader() {
+export function syncXsrfHeader() {
   const token = readCookie("XSRF-TOKEN");
   if (token) {
     http.defaults.headers.common["X-XSRF-TOKEN"] = token;
+  } else {
+    delete http.defaults.headers.common["X-XSRF-TOKEN"];
   }
+  return token;
 }
 
-const shared = {
+export const http = axios.create({
+  baseURL: apiBase,
   withCredentials: true,
   withXSRFToken: true,
   xsrfCookieName: "XSRF-TOKEN",
@@ -30,21 +35,19 @@ const shared = {
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   },
-};
-
-export const http = axios.create({
-  ...shared,
-  baseURL: apiBase,
-  headers: {
-    ...shared.headers,
-    "Content-Type": "application/json",
-  },
 });
 
-/** Hit Sanctum so Laravel sets XSRF-TOKEN + session cookies (Domain must be shared). */
+/** Refresh Sanctum CSRF cookie + sync header for the next mutating request. */
 export async function csrf() {
   await axios.get(`${apiRoot}/sanctum/csrf-cookie`, {
-    ...shared,
+    withCredentials: true,
+    withXSRFToken: true,
+    xsrfCookieName: "XSRF-TOKEN",
+    xsrfHeaderName: "X-XSRF-TOKEN",
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
   });
   syncXsrfHeader();
 }

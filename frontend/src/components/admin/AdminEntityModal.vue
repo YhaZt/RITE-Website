@@ -159,18 +159,127 @@ const updateField = (field, value) => {
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content { background: #fff; width: 100%; max-width: 650px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-.modal-content--wide { max-width: 960px; max-height: 92vh; overflow-y: auto; }
-.modal-header { padding: 1.25rem 1.5rem; background: #094A25; color: #fff; display: flex; justify-content: space-between; align-items: center; }
-.modal-header h3 { margin: 0; font-size: 1.15rem; }
-.modal-close { background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
-.modal-form { padding: 1.5rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-group { margin-bottom: 1.25rem; }
-.form-group label { display: block; margin-bottom: 0.4rem; font-weight: 700; color: #334155; font-size: 0.85rem; }
-.form-group input, .form-group textarea { width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
-.btn-cancel { background: #f1f5f9; color: #475569; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-primary { background: #094A25; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 650px;
+  margin: auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.modal-content--wide {
+  max-width: min(960px, 100%);
+  max-height: none;
+}
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  background: #094A25;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: #ffffff;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.modal-form {
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.form-group {
+  margin-bottom: 1.25rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 700;
+  color: #334155;
+  font-size: 0.85rem;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #094A25;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: stretch;
+  }
+  .modal-content,
+  .modal-content--wide {
+    max-width: 100%;
+    border-radius: 12px;
+    min-height: calc(100vh - 1rem);
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+  .btn-cancel,
+  .btn-primary {
+    width: 100%;
+  }
+}
 </style>

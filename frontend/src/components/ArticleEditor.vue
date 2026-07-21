@@ -27,17 +27,33 @@
             </select>
           </div>
           <div class="form-group form-group-tags">
-            <label for="article-tags">Tags <span class="tag-hint">(Ctrl/Cmd+click for multiple)</span></label>
-            <select
-              id="article-tags"
-              class="tags-multi-select"
-              multiple
-              size="8"
-              v-model="selectedTagsModel"
-              aria-label="Article tags"
-            >
-              <option v-for="tag in tagOptions" :key="tag" :value="tag">{{ tag }}</option>
-            </select>
+            <label>Tags</label>
+            <div class="tags-dropdown" ref="tagsDropdownRef">
+              <button
+                type="button"
+                class="tags-dropdown-trigger"
+                :aria-expanded="tagsOpen"
+                @click="tagsOpen = !tagsOpen"
+              >
+                <span class="tags-dropdown-summary">{{ tagsSummary }}</span>
+                <span class="tags-dropdown-caret" aria-hidden="true">▾</span>
+              </button>
+              <div v-if="tagsOpen" class="tags-dropdown-panel" role="listbox" aria-multiselectable="true">
+                <label
+                  v-for="tag in tagOptions"
+                  :key="tag"
+                  class="tags-dropdown-option"
+                >
+                  <input
+                    type="checkbox"
+                    :value="tag"
+                    :checked="selectedTagsModel.includes(tag)"
+                    @change="toggleTag(tag)"
+                  />
+                  <span>{{ tag }}</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -105,7 +121,6 @@
           </button>
         </div>
       </div>
-      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Photos are compressed in the browser before upload, then converted to WebP on the server. If you still see “too large” (413), raise nginx/PHP upload limits on the API host (see deployment docs).</p>
 
       <input
         ref="imageInput"
@@ -135,7 +150,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import Editor from '@tinymce/tinymce-vue';
 import ImageUploadField from '@/components/ImageUploadField.vue';
 import { mediaService, resolveStorageUrl } from '@/services/mediaService';
@@ -212,6 +227,33 @@ const selectedTagsModel = computed({
   set: (values) => emit('update:tags', (values || []).join(', ')),
 });
 
+const tagsSummary = computed(() => {
+  const selected = selectedTagsModel.value;
+  if (!selected.length) return 'Select tags…';
+  if (selected.length <= 2) return selected.join(', ');
+  return `${selected.slice(0, 2).join(', ')} +${selected.length - 2} more`;
+});
+
+const tagsOpen = ref(false);
+const tagsDropdownRef = ref(null);
+
+const toggleTag = (tag) => {
+  const next = new Set(selectedTagsModel.value);
+  if (next.has(tag)) next.delete(tag);
+  else next.add(tag);
+  selectedTagsModel.value = [...next];
+};
+
+const onDocClick = (event) => {
+  if (!tagsDropdownRef.value) return;
+  if (!tagsDropdownRef.value.contains(event.target)) {
+    tagsOpen.value = false;
+  }
+};
+
+onMounted(() => document.addEventListener('click', onDocClick));
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick));
+
 const editorInstance = ref(null);
 const imageInput = ref(null);
 const galleryInput = ref(null);
@@ -272,9 +314,12 @@ const contentCss = `
 const editorInit = {
   height: 420,
   menubar: false,
+  statusbar: false,
+  elementpath: false,
   plugins: 'lists link image code fullscreen table',
   toolbar:
     'undo redo | blocks fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | blockquote hr | removeformat | fullscreen',
+  toolbar_mode: 'wrap',
   content_style: contentCss,
   branding: false,
   promotion: false,
@@ -493,19 +538,73 @@ const onGalleryFiles = async (e) => {
   font-size: 0.8rem;
 }
 
-.tags-multi-select {
+.tags-dropdown {
+  position: relative;
   width: 100%;
-  min-height: 10.5rem;
-  padding: 0.4rem;
+}
+
+.tags-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 0.85rem;
   background: #fff;
+  font-size: 0.9rem;
+  color: #0f172a;
+  cursor: pointer;
+  text-align: left;
   box-sizing: border-box;
 }
 
-.tags-multi-select option {
-  padding: 0.35rem 0.5rem;
+.tags-dropdown-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tags-dropdown-caret {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.tags-dropdown-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  padding: 0.35rem;
+}
+
+.tags-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #334155;
+  cursor: pointer;
+}
+
+.tags-dropdown-option:hover {
+  background: #f1f5f9;
+}
+
+.tags-dropdown-option input {
+  width: auto;
+  margin: 0;
+  accent-color: #094A25;
 }
 
 .form-group label {
@@ -584,16 +683,39 @@ const onGalleryFiles = async (e) => {
   border: 1px solid rgba(9, 74, 37, 0.35);
 }
 
-.media-hint {
-  margin: 0 0 0.65rem;
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
 .hidden-file { display: none; }
 
-@media (max-width: 800px) {
-  .article-layout { grid-template-columns: 1fr; }
-  .media-fields { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .article-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .article-meta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .media-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .article-stats {
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 600px) {
+  .article-editor {
+    gap: 0.75rem;
+  }
+
+  .media-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .media-btn,
+  .gallery-select {
+    width: 100%;
+  }
 }
 </style>

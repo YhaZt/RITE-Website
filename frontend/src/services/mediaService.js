@@ -1,14 +1,14 @@
-import { http } from '@/api/http';
+import { http, csrf, syncXsrfHeader } from '@/api/http';
 
 const baseURL =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_URL ||
   'http://localhost:8000';
 
-/** Skip re-encode when already small enough for typical nginx defaults. */
-const SKIP_COMPRESS_UNDER_BYTES = 900 * 1024;
-const MAX_EDGE = 1920;
-const OUTPUT_QUALITY = 0.82;
+/** Always compress above this so POSTs fit low nginx limits (~1m). */
+const SKIP_COMPRESS_UNDER_BYTES = 350 * 1024;
+const MAX_EDGE = 1600;
+const OUTPUT_QUALITY = 0.8;
 
 export function resolveStorageUrl(path) {
   if (!path) return '';
@@ -46,10 +46,6 @@ function canvasToBlob(canvas, type, quality) {
   });
 }
 
-/**
- * Resize + compress in the browser so uploads fit low nginx/PHP limits
- * (often 1MB default). Server still converts to WebP on save.
- */
 export async function compressImageForUpload(file) {
   if (!(file instanceof File) && !(file instanceof Blob)) {
     return file;
@@ -60,7 +56,6 @@ export async function compressImageForUpload(file) {
     return file;
   }
 
-  // GIFs may be animated — leave alone
   if (type === 'image/gif') {
     return file;
   }
@@ -93,20 +88,16 @@ export async function compressImageForUpload(file) {
     ctx.fillRect(0, 0, width, height);
     ctx.drawImage(img, 0, 0, width, height);
 
-    const preferWebp = typeof canvas.toBlob === 'function';
     let blob = null;
-    if (preferWebp) {
-      try {
-        blob = await canvasToBlob(canvas, 'image/webp', OUTPUT_QUALITY);
-      } catch {
-        blob = null;
-      }
+    try {
+      blob = await canvasToBlob(canvas, 'image/jpeg', OUTPUT_QUALITY);
+    } catch {
+      blob = null;
     }
     if (!blob || blob.size === 0) {
-      blob = await canvasToBlob(canvas, 'image/jpeg', OUTPUT_QUALITY);
+      blob = await canvasToBlob(canvas, 'image/webp', OUTPUT_QUALITY);
     }
 
-    // If compression somehow got larger, keep original
     if (blob.size >= file.size) {
       return file;
     }
@@ -124,17 +115,28 @@ export async function compressImageForUpload(file) {
 
 export const mediaService = {
   async uploadImage(file) {
+    // Fresh CSRF for each upload — long admin sessions otherwise get 419
+    await csrf();
+    syncXsrfHeader();
+
     const prepared = await compressImageForUpload(file);
     const formData = new FormData();
     formData.append('file', prepared);
-    // Let the browser set multipart boundary — do not force Content-Type
+
     const res = await http.post('/media', formData, {
-      headers: { 'Content-Type': undefined },
+      headers: {
+        'Content-Type': undefined,
+      },
       transformRequest: [
         (data, headers) => {
           if (headers && typeof headers === 'object') {
             delete headers['Content-Type'];
             delete headers['content-type'];
+            // Axios may nest defaults; clear common JSON content-type
+            if (headers.common) {
+              delete headers.common['Content-Type'];
+              delete headers.common['content-type'];
+            }
           }
           return data;
         },

@@ -98,10 +98,14 @@ const handleFile = async (file) => {
     }
     previewUrl.value = resolveStorageUrl(url);
   } catch (err) {
+    const status = err?.response?.status;
     const msg =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
-      (err?.response?.status === 413 ? 'Image is too large for the server.' : null) ||
+      (status === 413 ? 'Image is too large for the server.' : null) ||
+      (status === 419 || status === 401
+        ? 'Session expired. Refresh the page, sign in again, then retry the upload.'
+        : null) ||
       'Failed to upload image.';
     alert(msg);
     previewUrl.value = props.modelValue ? resolveStorageUrl(props.modelValue) : '';
