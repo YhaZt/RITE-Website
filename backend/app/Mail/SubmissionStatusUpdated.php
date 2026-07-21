@@ -23,7 +23,7 @@ class SubmissionStatusUpdated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Update on your RITE submission: ' . ($this->submission->subject ?? 'Unit Submission'),
+            subject: 'Update on your RITE submission: '.($this->submission->subject ?? 'Unit Submission'),
         );
     }
 

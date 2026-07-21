@@ -15,12 +15,6 @@ export async function login({ email, password, remember }) {
   return res.data?.user || getUser();
 }
 
-export async function register({ name, email, password, password_confirmation }) {
-  await csrf();
-  const res = await http.post("/register", { name, email, password, password_confirmation });
-  return res.data?.user || getUser();
-}
-
 export async function logout() {
   await csrf();
   await http.post("/logout");

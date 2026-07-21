@@ -2,25 +2,25 @@
 
 namespace Database\Seeders;
 
+use App\Models\CarouselSlide;
+use App\Models\EcosystemItem;
+use App\Models\NewsItem;
+use App\Models\OrgMember;
+use App\Models\ResearchCenter;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\NewsItem;
-use App\Models\CarouselSlide;
-use App\Models\ResearchCenter;
-use App\Models\OrgMember;
-use App\Models\EcosystemItem;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Default Admin User
+        // Default admin for local development only — change before any shared/prod use.
         User::updateOrCreate(
             ['email' => 'admin@rite.edu.ph'],
             [
                 'name' => 'Super Administrator',
-                'password' => Hash::make('password'),
+                'password' => Hash::make(env('ADMIN_SEED_PASSWORD', 'password')),
             ]
         );
 
@@ -159,7 +159,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Vice President for Research, Innovation, Technology & Extension', 'title' => 'Executive Leadership', 'division' => 'Executive Leadership', 'role_type' => 'executive_top', 'sort_order' => 1],
             ['name' => 'Leonel C. Mendoza', 'title' => 'OIC Vice President - RDE', 'division' => 'Executive Leadership', 'role_type' => 'executive', 'sort_order' => 2],
             ['name' => 'Engr. Randy A. Joco', 'title' => 'TBI Manager', 'division' => 'Executive Leadership', 'role_type' => 'executive', 'sort_order' => 3],
-            
+
             ['name' => 'University Researcher V', 'title' => 'Research Support', 'division' => 'Research & Publication', 'role_type' => 'support', 'sort_order' => 4],
             ['name' => 'University Researcher IV', 'title' => 'Research Support', 'division' => 'Research & Publication', 'role_type' => 'support', 'sort_order' => 5],
             ['name' => 'Campus Research Coordinator', 'title' => 'Research Support', 'division' => 'Research & Publication', 'role_type' => 'support', 'sort_order' => 6],
@@ -305,7 +305,7 @@ class DatabaseSeeder extends Seeder
             ['title' => 'Occidental Mindoro State College (OMSC), through Technology Business Incubation and Development Office (TBIDO)', 'category' => 'academic', 'description' => 'Occidental Mindoro State College (OMSC), through Technology Business Incubation and Development Office (TBIDO) Partner', 'link' => 'https://omsc.edu.ph/news/omsc-tbid-and-dti-occidental-mindoro-forge-partnership-to-advance-startup-development', 'image' => '/ecosystem/omsc.logo.png', 'sort_order' => 118],
             ['title' => 'Fhether John B. Calanday, Co-Founder of IT-ERA Technology Solutions', 'category' => 'lgu', 'description' => 'Fhether John B. Calanday, Co-Founder of IT-ERA Technology Solutions Partner', 'link' => 'https://www.facebook.com/iTEraCompany/', 'image' => '/ecosystem/ITERA.png', 'sort_order' => 119],
             ['title' => 'Francis Neil B. Quijano, Lead Agritech of AGRITEKTURA', 'category' => 'lgu', 'description' => 'Francis Neil B. Quijano, Lead Agritech of AGRITEKTURA Partner', 'link' => 'https://agritektura.ph/people/', 'image' => '/ecosystem/AGRITEKTURA-LOGO-ICON.png', 'sort_order' => 120],
-            ['title' => 'Nelson B. Gabutero, Owner of Gabutero Organic Farm', 'category' => 'lgu', 'description' => 'Nelson B. Gabutero, Owner of Gabutero Organic Farm Partner', 'link' => 'https://www.facebook.com/gabuteroorganicfarm/', 'image' => '/ecosystem/gabutero.jpg', 'sort_order' => 121]
+            ['title' => 'Nelson B. Gabutero, Owner of Gabutero Organic Farm', 'category' => 'lgu', 'description' => 'Nelson B. Gabutero, Owner of Gabutero Organic Farm Partner', 'link' => 'https://www.facebook.com/gabuteroorganicfarm/', 'image' => '/ecosystem/gabutero.jpg', 'sort_order' => 121],
         ];
 
         foreach ($ecosystem as $eco) {

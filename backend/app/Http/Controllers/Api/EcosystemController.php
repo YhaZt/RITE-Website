@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreEcosystemRequest;
+use App\Http\Requests\UpdateEcosystemRequest;
 use App\Models\EcosystemItem;
-use Illuminate\Http\Request;
 
 class EcosystemController extends Controller
 {
@@ -13,45 +14,31 @@ class EcosystemController extends Controller
         return response()->json(EcosystemItem::orderBy('sort_order', 'asc')->get());
     }
 
-    public function store(Request $request)
+    public function store(StoreEcosystemRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'link' => 'nullable|string',
-            'image' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $item = EcosystemItem::create($request->validated());
 
-        $item = EcosystemItem::create($validated);
         return response()->json(['message' => 'Ecosystem item created', 'data' => $item], 201);
     }
 
-    public function show(string $id)
+    public function show(string $ecosystem)
     {
-        return response()->json(EcosystemItem::findOrFail($id));
+        return response()->json(EcosystemItem::findOrFail($ecosystem));
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateEcosystemRequest $request, string $ecosystem)
     {
-        $item = EcosystemItem::findOrFail($id);
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'link' => 'nullable|string',
-            'image' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
-        $item->update($validated);
+        $item = EcosystemItem::findOrFail($ecosystem);
+        $item->update($request->validated());
+
         return response()->json(['message' => 'Ecosystem item updated', 'data' => $item]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $ecosystem)
     {
-        $item = EcosystemItem::findOrFail($id);
+        $item = EcosystemItem::findOrFail($ecosystem);
         $item->delete();
+
         return response()->json(['message' => 'Ecosystem item deleted']);
     }
 }

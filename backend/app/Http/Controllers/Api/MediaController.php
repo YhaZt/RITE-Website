@@ -3,43 +3,38 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreMediaRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
 class MediaController extends Controller
 {
-    /** Max upload size in KB (50 MB). Images are resized/converted to WebP on save. */
-    private const MAX_KB = 51200;
-
-    public function store(Request $request)
+    public function store(StoreMediaRequest $request)
     {
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:jpeg,jpg,png,webp,gif|max:' . self::MAX_KB,
-        ]);
-
-        $file = $validated['file'];
+        $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
-        $filename = Str::uuid()->toString() . '.webp';
-        $relativePath = 'cms/' . $filename;
+        $filename = Str::uuid()->toString().'.webp';
+        $relativePath = 'cms/'.$filename;
 
         try {
             $binary = $this->convertToWebp($file->getRealPath(), $file->getMimeType());
         } catch (Throwable $e) {
             report($e);
 
-            return response()->json([
-                'message' => 'Could not convert image to WebP.',
-                'error' => $e->getMessage(),
-            ], 422);
+            $payload = ['message' => 'Could not convert image to WebP.'];
+            if (config('app.debug')) {
+                $payload['error'] = $e->getMessage();
+            }
+
+            return response()->json($payload, 422);
         }
 
         Storage::disk('public')->put($relativePath, $binary);
 
         return response()->json([
-            'url' => '/storage/' . $relativePath,
-            'filename' => pathinfo($originalName, PATHINFO_FILENAME) . '.webp',
+            'url' => '/storage/'.$relativePath,
+            'filename' => pathinfo($originalName, PATHINFO_FILENAME).'.webp',
         ], 201);
     }
 
@@ -57,7 +52,6 @@ class MediaController extends Controller
             throw new \RuntimeException('Unable to read uploaded file.');
         }
 
-        // Prefer format-specific loaders when available (more reliable for large JPEG/PNG)
         $image = false;
         $mime = strtolower((string) $mimeType);
         if (($mime === 'image/jpeg' || $mime === 'image/jpg') && function_exists('imagecreatefromjpeg')) {
@@ -106,7 +100,6 @@ class MediaController extends Controller
             imagesavealpha($image, true);
         }
 
-        // Flatten onto white for formats that can produce empty WebP with alpha quirks
         $w = imagesx($image);
         $h = imagesy($image);
         $canvas = imagecreatetruecolor($w, $h);

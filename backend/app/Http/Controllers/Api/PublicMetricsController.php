@@ -140,7 +140,7 @@ class PublicMetricsController extends Controller
                 $key = "{$year}-Q{$q}";
                 $quarters[$key] = [
                     'key' => $key,
-                    'label' => "Q{$q} " . substr((string) $year, 2),
+                    'label' => "Q{$q} ".substr((string) $year, 2),
                     'count' => 0,
                     'year' => $year,
                     'quarter' => $q,
@@ -155,7 +155,7 @@ class PublicMetricsController extends Controller
                         return;
                     }
                     $created = Carbon::parse($row->created_at);
-                    $key = $created->year . '-Q' . $created->quarter;
+                    $key = $created->year.'-Q'.$created->quarter;
                     if (isset($quarters[$key])) {
                         $quarters[$key]['count']++;
                     }

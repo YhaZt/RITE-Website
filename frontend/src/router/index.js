@@ -14,10 +14,9 @@ const routes = [
     meta: { requiresGuest: true },
   },
   {
+    // Public registration is disabled; admin accounts are seeded / created by operators.
     path: "/register",
-    name: "Register",
-    component: () => import("../views/auth/Register.vue"),
-    meta: { requiresGuest: true },
+    redirect: { name: "Login" },
   },
   {
     path: "/forgot-password",

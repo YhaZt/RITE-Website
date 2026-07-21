@@ -453,6 +453,7 @@ onUnmounted(() => {
   font-size: 1.5rem;
   font-weight: 800;
   margin: 0 0 2rem 0;
+  color: #ffffff;
 }
 
 .objectives-list {
@@ -514,7 +515,7 @@ onUnmounted(() => {
 
 .focus-subtitle {
   text-align: center;
-  color: #64748b;
+  color: #334155;
   margin: 0 0 4rem 0;
   font-size: 1rem;
 }
@@ -688,12 +689,14 @@ onUnmounted(() => {
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 800;
   margin: 0 0 0.6rem;
+  color: #ffffff;
 }
 
 .carousel-caption p {
   font-size: 1rem;
   line-height: 1.7;
-  opacity: 0.9;
+  color: #f1f5f9;
+  opacity: 1;
   margin: 0 0 1.5rem;
 }
 

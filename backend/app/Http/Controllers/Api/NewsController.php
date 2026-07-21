@@ -3,76 +3,42 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreNewsRequest;
+use App\Http\Requests\UpdateNewsRequest;
 use App\Models\NewsItem;
-use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(NewsItem::latest()->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreNewsRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'tags' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
-            'date' => 'nullable|string',
-            'image' => 'nullable|string',
-            'link' => 'nullable|string',
-        ]);
-
-        $item = NewsItem::create($validated);
+        $item = NewsItem::create($request->validated());
 
         return response()->json(['message' => 'News item created successfully', 'data' => $item], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(string $news)
     {
-        $item = NewsItem::findOrFail($id);
+        $item = NewsItem::findOrFail($news);
+
         return response()->json($item);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateNewsRequest $request, string $news)
     {
-        $item = NewsItem::findOrFail($id);
-
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'tags' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
-            'date' => 'nullable|string',
-            'image' => 'nullable|string',
-            'link' => 'nullable|string',
-        ]);
-
-        $item->update($validated);
+        $item = NewsItem::findOrFail($news);
+        $item->update($request->validated());
 
         return response()->json(['message' => 'News item updated successfully', 'data' => $item]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $news)
     {
-        $item = NewsItem::findOrFail($id);
+        $item = NewsItem::findOrFail($news);
         $item->delete();
 
         return response()->json(['message' => 'News item deleted successfully']);

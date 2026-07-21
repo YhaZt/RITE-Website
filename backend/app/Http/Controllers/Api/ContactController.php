@@ -3,67 +3,48 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreContactRequest;
+use App\Http\Requests\UpdateContactRequest;
 use App\Models\ContactSubmission;
-use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    /**
-     * Display a listing of contact submissions.
-     */
     public function index()
     {
         return response()->json(ContactSubmission::latest()->get());
     }
 
-    /**
-     * Store a newly created contact submission.
-     */
-    public function store(Request $request)
+    public function store(StoreContactRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'subject' => 'nullable|string|max:255',
-            'message' => 'required|string',
-        ]);
+        $submission = ContactSubmission::create($request->validated());
 
-        $submission = ContactSubmission::create($validated);
-
-        return response()->json(['message' => 'Your message has been submitted successfully!', 'data' => $submission], 201);
+        return response()->json([
+            'message' => 'Your message has been submitted successfully!',
+            'data' => $submission,
+        ], 201);
     }
 
-    /**
-     * Display the specified contact submission.
-     */
-    public function show(string $id)
+    public function show(string $contact)
     {
-        $submission = ContactSubmission::findOrFail($id);
+        $submission = ContactSubmission::findOrFail($contact);
+
         return response()->json($submission);
     }
 
-    /**
-     * Update status or details of contact submission.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateContactRequest $request, string $contact)
     {
-        $submission = ContactSubmission::findOrFail($id);
+        $submission = ContactSubmission::findOrFail($contact);
+        $submission->update($request->validated());
 
-        $validated = $request->validate([
-            'status' => 'sometimes|required|string|in:unread,read,replied,archived',
+        return response()->json([
+            'message' => 'Contact submission updated successfully',
+            'data' => $submission,
         ]);
-
-        $submission->update($validated);
-
-        return response()->json(['message' => 'Contact submission updated successfully', 'data' => $submission]);
     }
 
-    /**
-     * Remove the specified contact submission.
-     */
-    public function destroy(string $id)
+    public function destroy(string $contact)
     {
-        $submission = ContactSubmission::findOrFail($id);
+        $submission = ContactSubmission::findOrFail($contact);
         $submission->delete();
 
         return response()->json(['message' => 'Contact submission archived successfully']);

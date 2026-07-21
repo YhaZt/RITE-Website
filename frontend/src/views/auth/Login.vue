@@ -72,7 +72,6 @@
 
         <div class="auth-links">
           <router-link to="/forgot-password" class="auth-link">Forgot password?</router-link>
-          <router-link to="/register" class="auth-link">Create account</router-link>
         </div>
       </div>
     </div>

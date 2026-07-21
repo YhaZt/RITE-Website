@@ -19,9 +19,10 @@ export function useAuth() {
     try {
       errors.value = [];
       const me = await authService.getUser();
-      user.value = me;
+      // Require a real user payload; never treat empty/401 as logged in
+      user.value = me?.id ? me : null;
     } catch {
-      // not logged in
+      user.value = null;
     } finally {
       booting.value = false;
     }
@@ -31,21 +32,13 @@ export function useAuth() {
     try {
       errors.value = [];
       const me = await authService.login(payload);
-      user.value = me;
+      user.value = me?.id ? me : null;
+      if (!user.value) {
+        throw new Error("Login succeeded but no user was returned.");
+      }
       return me;
     } catch (err) {
-      errors.value = normalizeErrors(err);
-      throw err;
-    }
-  };
-
-  const register = async (payload) => {
-    try {
-      errors.value = [];
-      const me = await authService.register(payload);
-      user.value = me;
-      return me;
-    } catch (err) {
+      user.value = null;
       errors.value = normalizeErrors(err);
       throw err;
     }
@@ -66,7 +59,6 @@ export function useAuth() {
     errors: readonly(errors),
     init,
     login,
-    register,
     logout,
   };
 }

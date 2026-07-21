@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreOrgMemberRequest;
+use App\Http\Requests\UpdateOrgMemberRequest;
 use App\Models\OrgMember;
-use Illuminate\Http\Request;
 
 class OrgMemberController extends Controller
 {
@@ -13,43 +14,31 @@ class OrgMemberController extends Controller
         return response()->json(OrgMember::orderBy('sort_order', 'asc')->get());
     }
 
-    public function store(Request $request)
+    public function store(StoreOrgMemberRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'division' => 'nullable|string|max:255',
-            'role_type' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $member = OrgMember::create($request->validated());
 
-        $member = OrgMember::create($validated);
         return response()->json(['message' => 'Org member created', 'data' => $member], 201);
     }
 
-    public function show(string $id)
+    public function show(string $org_member)
     {
-        return response()->json(OrgMember::findOrFail($id));
+        return response()->json(OrgMember::findOrFail($org_member));
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateOrgMemberRequest $request, string $org_member)
     {
-        $member = OrgMember::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'title' => 'sometimes|required|string|max:255',
-            'division' => 'nullable|string|max:255',
-            'role_type' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
-        $member->update($validated);
+        $member = OrgMember::findOrFail($org_member);
+        $member->update($request->validated());
+
         return response()->json(['message' => 'Org member updated', 'data' => $member]);
     }
 
-    public function destroy(string $id)
+    public function destroy(string $org_member)
     {
-        $member = OrgMember::findOrFail($id);
+        $member = OrgMember::findOrFail($org_member);
         $member->delete();
+
         return response()->json(['message' => 'Org member deleted']);
     }
 }

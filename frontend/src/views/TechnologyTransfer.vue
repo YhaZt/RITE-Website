@@ -94,7 +94,7 @@
 
       <div class="functions-grid">
         <div
-          v-for="(func, idx) in ttpuFunctions"
+          v-for="func in ttpuFunctions"
           :key="func.title"
           class="function-card"
           :style="{

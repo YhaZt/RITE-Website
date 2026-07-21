@@ -3,70 +3,42 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCarouselRequest;
+use App\Http\Requests\UpdateCarouselRequest;
 use App\Models\CarouselSlide;
-use Illuminate\Http\Request;
 
 class CarouselController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(CarouselSlide::orderBy('sort_order', 'asc')->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreCarouselRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
-
-        $slide = CarouselSlide::create($validated);
+        $slide = CarouselSlide::create($request->validated());
 
         return response()->json(['message' => 'Carousel slide created successfully', 'data' => $slide], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(string $carousel)
     {
-        $slide = CarouselSlide::findOrFail($id);
+        $slide = CarouselSlide::findOrFail($carousel);
+
         return response()->json($slide);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateCarouselRequest $request, string $carousel)
     {
-        $slide = CarouselSlide::findOrFail($id);
-
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
-
-        $slide->update($validated);
+        $slide = CarouselSlide::findOrFail($carousel);
+        $slide->update($request->validated());
 
         return response()->json(['message' => 'Carousel slide updated successfully', 'data' => $slide]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $carousel)
     {
-        $slide = CarouselSlide::findOrFail($id);
+        $slide = CarouselSlide::findOrFail($carousel);
         $slide->delete();
 
         return response()->json(['message' => 'Carousel slide deleted successfully']);

@@ -3,33 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreResearchCenterRequest;
+use App\Http\Requests\UpdateResearchCenterRequest;
 use App\Models\ResearchCenter;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ResearchCenterController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return response()->json(ResearchCenter::latest()->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreResearchCenterRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|unique:research_centers,slug',
-            'description' => 'nullable|string',
-            'category' => 'nullable|string',
-            'contact_email' => 'nullable|email',
-            'image' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
@@ -40,47 +28,39 @@ class ResearchCenterController extends Controller
         return response()->json(['message' => 'Research center created successfully', 'data' => $center], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(string $center)
     {
-        $center = is_numeric($id) ? ResearchCenter::findOrFail($id) : ResearchCenter::where('slug', $id)->firstOrFail();
-        return response()->json($center);
+        $model = is_numeric($center)
+            ? ResearchCenter::findOrFail($center)
+            : ResearchCenter::where('slug', $center)->firstOrFail();
+
+        return response()->json($model);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateResearchCenterRequest $request, string $center)
     {
-        $center = is_numeric($id) ? ResearchCenter::findOrFail($id) : ResearchCenter::where('slug', $id)->firstOrFail();
+        $model = is_numeric($center)
+            ? ResearchCenter::findOrFail($center)
+            : ResearchCenter::where('slug', $center)->firstOrFail();
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'slug' => 'nullable|string|unique:research_centers,slug,' . $center->id,
-            'description' => 'nullable|string',
-            'category' => 'nullable|string',
-            'contact_email' => 'nullable|email',
-            'image' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['name']) && empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        $center->update($validated);
+        $model->update($validated);
 
-        return response()->json(['message' => 'Research center updated successfully', 'data' => $center]);
+        return response()->json(['message' => 'Research center updated successfully', 'data' => $model]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $center)
     {
-        $center = is_numeric($id) ? ResearchCenter::findOrFail($id) : ResearchCenter::where('slug', $id)->firstOrFail();
-        $center->delete();
+        $model = is_numeric($center)
+            ? ResearchCenter::findOrFail($center)
+            : ResearchCenter::where('slug', $center)->firstOrFail();
+
+        $model->delete();
 
         return response()->json(['message' => 'Research center deleted successfully']);
     }

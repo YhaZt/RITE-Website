@@ -124,7 +124,7 @@ const handleSubmit = async () => {
     setTimeout(() => {
       submitSuccess.value = false;
     }, 4000);
-  } catch (e) {
+  } catch (_e) {
     alert("Error submitting inquiry. Please try again.");
   } finally {
     submitting.value = false;
