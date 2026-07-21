@@ -41,6 +41,29 @@ php artisan storage:link
 
 Use `backend/public/.htaccess` for Laravel. Ensure `mod_rewrite` is enabled. SPA history mode needs a fallback to `index.html` for frontend routes.
 
+## Media upload limits (413 Content Too Large)
+
+The SPA compresses images in the browser before upload, but the **API host** must still allow a reasonable POST body (galleries / uncompressed files).
+
+**Nginx** (API vhost `server { }` block):
+
+```nginx
+client_max_body_size 50M;
+```
+
+Then: `sudo nginx -t && sudo systemctl reload nginx`
+
+**PHP** (`php.ini` or FPM pool):
+
+```ini
+upload_max_filesize = 50M
+post_max_size = 50M
+```
+
+Then restart PHP-FPM, e.g. `sudo systemctl restart php8.2-fpm`.
+
+Laravel media validation allows up to 50MB; images are converted to WebP on the server.
+
 ## Security checklist
 
 - [ ] `APP_DEBUG=false`
@@ -48,3 +71,4 @@ Use `backend/public/.htaccess` for Laravel. Ensure `mod_rewrite` is enabled. SPA
 - [ ] CORS origins locked to the real SPA host
 - [ ] No `.env` in the web root / not downloadable
 - [ ] Storage and uploads not executable as PHP
+- [ ] `client_max_body_size` / PHP upload limits raised (see above)

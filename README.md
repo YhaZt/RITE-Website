@@ -122,6 +122,10 @@ VITE_API_BASE_URL=https://api.rite.minsuibibes.com
 
 and rebuild after changing it (`npm run build`).
 
+### Media uploads (413 errors)
+
+Phone photos of a few MB can still fail if nginx defaults to `client_max_body_size 1m`. The SPA compresses images before upload; also set API host limits to **50M** (nginx + PHP). See [docs/deployment-apache.md](docs/deployment-apache.md#media-upload-limits-413-content-too-large).
+
 More detail: [docs/deployment-apache.md](docs/deployment-apache.md)
 
 ## Optional local Docker

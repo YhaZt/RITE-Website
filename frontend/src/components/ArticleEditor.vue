@@ -27,20 +27,17 @@
             </select>
           </div>
           <div class="form-group form-group-tags">
-            <label>Tags <span class="tag-hint">(select one or more)</span></label>
-            <div class="tag-chip-list" role="group" aria-label="Article tags">
-              <button
-                v-for="tag in tagOptions"
-                :key="tag"
-                type="button"
-                class="tag-chip"
-                :class="{ active: selectedTags.includes(tag) }"
-                :aria-pressed="selectedTags.includes(tag)"
-                @click="toggleTag(tag)"
-              >
-                {{ tag }}
-              </button>
-            </div>
+            <label for="article-tags">Tags <span class="tag-hint">(Ctrl/Cmd+click for multiple)</span></label>
+            <select
+              id="article-tags"
+              class="tags-multi-select"
+              multiple
+              size="8"
+              v-model="selectedTagsModel"
+              aria-label="Article tags"
+            >
+              <option v-for="tag in tagOptions" :key="tag" :value="tag">{{ tag }}</option>
+            </select>
           </div>
         </div>
 
@@ -108,7 +105,7 @@
           </button>
         </div>
       </div>
-      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Large photos are OK — the server converts them to WebP. If upload fails with “too large”, the server PHP/nginx limit needs raising (see README).</p>
+      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Photos are compressed in the browser before upload, then converted to WebP on the server. If you still see “too large” (413), raise nginx/PHP upload limits on the API host (see deployment docs).</p>
 
       <input
         ref="imageInput"
@@ -152,25 +149,38 @@ const categoryOptions = [
   'Extension',
   'Event',
   'Training',
+  'Workshop',
+  'Seminar',
   'Partnership',
   'Publication',
   'Student Opportunity',
+  'Ethics & Integrity',
+  'Awards & Recognition',
+  'Call for Proposals',
 ];
 
 /** Multi-select tags stored as a comma-separated string for the API. */
 const tagOptions = [
   'Faculty Research',
   'Student Research',
-  'Interdisciplinary',
+  'Interdisciplinary Collaboration',
   'Technology Transfer',
   'Intellectual Property',
+  'Patent & ITSO',
   'Community Engagement',
   'Industry Partnership',
   'Capacity Building',
   'Knowledge Translation',
   'Societal Impact',
+  'Regional Development',
   'MIMAROPA',
   'Sustainability',
+  'Smart Agriculture',
+  'Digital Innovation',
+  'Food Innovation',
+  'Fisheries',
+  'Environmental Studies',
+  'Extension Services',
 ];
 
 const props = defineProps({
@@ -193,19 +203,14 @@ const emit = defineEmits([
   'update:description',
 ]);
 
-const selectedTags = computed(() =>
-  (props.tags || '')
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean)
-);
-
-const toggleTag = (tag) => {
-  const set = new Set(selectedTags.value);
-  if (set.has(tag)) set.delete(tag);
-  else set.add(tag);
-  emit('update:tags', [...set].join(', '));
-};
+const selectedTagsModel = computed({
+  get: () =>
+    (props.tags || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean),
+  set: (values) => emit('update:tags', (values || []).join(', ')),
+});
 
 const editorInstance = ref(null);
 const imageInput = ref(null);
@@ -488,32 +493,19 @@ const onGalleryFiles = async (e) => {
   font-size: 0.8rem;
 }
 
-.tag-chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.tag-chip {
+.tags-multi-select {
+  width: 100%;
+  min-height: 10.5rem;
+  padding: 0.4rem;
   border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  color: #334155;
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  box-sizing: border-box;
 }
 
-.tag-chip:hover {
-  border-color: #0b7f47;
-  color: #094A25;
-}
-
-.tag-chip.active {
-  background: #dcfce7;
-  border-color: #0b7f47;
-  color: #14532d;
+.tags-multi-select option {
+  padding: 0.35rem 0.5rem;
 }
 
 .form-group label {

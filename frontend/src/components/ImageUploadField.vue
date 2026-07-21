@@ -26,7 +26,7 @@
           <path d="M21 15l-5-5L5 21" />
         </svg>
         <p><strong>Drop image here</strong> or click to browse</p>
-        <span>JPEG, PNG, WebP, GIF — saved as WebP (any size; auto-resized)</span>
+        <span>JPEG, PNG, WebP, GIF — compressed in browser, saved as WebP</span>
       </div>
       <div v-if="uploading" class="dropzone-loading">Uploading…</div>
     </div>
