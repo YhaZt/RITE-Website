@@ -23,21 +23,24 @@
           <div class="form-group">
             <label>Category <span class="required">*</span></label>
             <select :value="category" @change="$emit('update:category', $event.target.value)">
-              <option value="Announcement">Announcement</option>
-              <option value="Event">Event</option>
-              <option value="Research">Research</option>
-              <option value="Extension">Extension</option>
-              <option value="Innovation">Innovation</option>
+              <option v-for="opt in categoryOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Tags</label>
-            <input
-              :value="tags"
-              type="text"
-              placeholder="e.g. research, extension, innovation"
-              @input="$emit('update:tags', $event.target.value)"
-            />
+          <div class="form-group form-group-tags">
+            <label>Tags <span class="tag-hint">(select one or more)</span></label>
+            <div class="tag-chip-list" role="group" aria-label="Article tags">
+              <button
+                v-for="tag in tagOptions"
+                :key="tag"
+                type="button"
+                class="tag-chip"
+                :class="{ active: selectedTags.includes(tag) }"
+                :aria-pressed="selectedTags.includes(tag)"
+                @click="toggleTag(tag)"
+              >
+                {{ tag }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -105,7 +108,7 @@
           </button>
         </div>
       </div>
-      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Any image size is accepted — uploads are resized and converted to WebP on the server.</p>
+      <p class="media-hint">Tip: choose Left or Right to wrap text around images. Large photos are OK — the server converts them to WebP. If upload fails with “too large”, the server PHP/nginx limit needs raising (see README).</p>
 
       <input
         ref="imageInput"
@@ -140,6 +143,36 @@ import Editor from '@tinymce/tinymce-vue';
 import ImageUploadField from '@/components/ImageUploadField.vue';
 import { mediaService, resolveStorageUrl } from '@/services/mediaService';
 
+/** RITE-aligned categories for faculty, research, innovation, tech & extension. */
+const categoryOptions = [
+  'Announcement',
+  'Research',
+  'Innovation',
+  'Technology',
+  'Extension',
+  'Event',
+  'Training',
+  'Partnership',
+  'Publication',
+  'Student Opportunity',
+];
+
+/** Multi-select tags stored as a comma-separated string for the API. */
+const tagOptions = [
+  'Faculty Research',
+  'Student Research',
+  'Interdisciplinary',
+  'Technology Transfer',
+  'Intellectual Property',
+  'Community Engagement',
+  'Industry Partnership',
+  'Capacity Building',
+  'Knowledge Translation',
+  'Societal Impact',
+  'MIMAROPA',
+  'Sustainability',
+];
+
 const props = defineProps({
   title: { type: String, default: '' },
   category: { type: String, default: 'Announcement' },
@@ -159,6 +192,20 @@ const emit = defineEmits([
   'update:link',
   'update:description',
 ]);
+
+const selectedTags = computed(() =>
+  (props.tags || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean)
+);
+
+const toggleTag = (tag) => {
+  const set = new Set(selectedTags.value);
+  if (set.has(tag)) set.delete(tag);
+  else set.add(tag);
+  emit('update:tags', [...set].join(', '));
+};
 
 const editorInstance = ref(null);
 const imageInput = ref(null);
@@ -282,6 +329,21 @@ const buildFigureHtml = (imageUrl, caption, layout) => {
 const triggerImagePick = () => imageInput.value?.click();
 const triggerGalleryPick = () => galleryInput.value?.click();
 
+const uploadErrorMessage = (err) => {
+  const status = err?.response?.status;
+  if (status === 413) {
+    return 'The image is too large for the server upload limit. Try a smaller file, or ask the admin to raise PHP/nginx upload limits.';
+  }
+  if (status === 401 || status === 419) {
+    return 'Your session expired. Refresh the page and sign in again, then retry the upload.';
+  }
+  return (
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    'Failed to upload image.'
+  );
+};
+
 const onImageFile = async (e) => {
   const file = e.target.files?.[0];
   e.target.value = '';
@@ -292,11 +354,7 @@ const onImageFile = async (e) => {
     insertHtml(buildFigureHtml(absoluteUrl(url), mediaCaption.value, mediaLayout.value));
     mediaCaption.value = '';
   } catch (err) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      'Failed to upload image.';
-    alert(msg);
+    alert(uploadErrorMessage(err));
   } finally {
     mediaBusy.value = false;
   }
@@ -317,11 +375,7 @@ const onGalleryFiles = async (e) => {
     const imgs = urls.map((u) => `<img src="${escapeHtml(u)}" alt="" />`).join('');
     insertHtml(`<div class="news-gallery news-gallery--cols-${cols}">${imgs}</div><p></p>`);
   } catch (err) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.error ||
-      'Failed to upload gallery images.';
-    alert(msg);
+    alert(uploadErrorMessage(err));
   } finally {
     mediaBusy.value = false;
   }
@@ -424,8 +478,50 @@ const onGalleryFiles = async (e) => {
 
 .article-meta-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1rem;
+}
+
+.tag-hint {
+  font-weight: 500;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.tag-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tag-chip {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tag-chip:hover {
+  border-color: #0b7f47;
+  color: #094A25;
+}
+
+.tag-chip.active {
+  background: #dcfce7;
+  border-color: #0b7f47;
+  color: #14532d;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #334155;
 }
 
 .form-group label,

@@ -11,8 +11,8 @@ class StoreMediaRequest extends FormRequest
         return true;
     }
 
-    /** Max upload size in KB (10 MB). */
-    public const MAX_KB = 10240;
+    /** Max upload size in KB (50 MB). Images are resized to WebP on save. */
+    public const MAX_KB = 51200;
 
     public function rules(): array
     {
