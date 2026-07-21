@@ -51,3 +51,26 @@ export async function csrf() {
   });
   syncXsrfHeader();
 }
+
+http.interceptors.request.use((config) => {
+  syncXsrfHeader();
+  return config;
+});
+
+http.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error?.response?.status;
+    const config = error?.config;
+    if (status === 419 && config && !config.__csrfRetried) {
+      config.__csrfRetried = true;
+      try {
+        await csrf();
+        return http.request(config);
+      } catch {
+        // fall through to original error
+      }
+    }
+    return Promise.reject(error);
+  }
+);

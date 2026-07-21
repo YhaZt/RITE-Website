@@ -14,11 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
 
-        // Authenticated multipart uploads from the SPA often fail CSRF across
-        // api.* / rite.* subdomains even when the session cookie is valid.
-        // Route remains protected by auth:sanctum.
+        // SPA lives on rite.* and API on api.* — cookie CSRF is unreliable across
+        // those hosts even with SESSION_DOMAIN=.minsuibibes.com. Admin mutations
+        // stay protected by auth:sanctum; SameSite=lax blocks classic cross-site
+        // cookie CSRF for credentialed browser requests.
         $middleware->validateCsrfTokens(except: [
-            'api/media',
+            'api/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -802,8 +802,21 @@ const saveForm = async () => {
     }
     closeModal();
     await loadAll();
-  } catch (_e) {
-    alert("Error saving record to Laravel backend.");
+  } catch (err) {
+    const status = err?.response?.status;
+    const apiMessage = err?.response?.data?.message || err?.response?.data?.error;
+    if (status === 419) {
+      alert(apiMessage || 'CSRF token mismatch (419). Pull latest backend, clear minsuibibes.com cookies, log in again, then retry.');
+    } else if (status === 401) {
+      alert('Not authorized (401). Log out, log in again, then retry Save.');
+    } else if (status === 422) {
+      const first = err?.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat()[0]
+        : null;
+      alert(first || apiMessage || 'Validation failed. Check required fields.');
+    } else {
+      alert(apiMessage || 'Error saving record to Laravel backend.');
+    }
   }
 };
 
