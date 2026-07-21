@@ -1,17 +1,22 @@
 <?php
 
-$frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
-$extraOrigins = array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', ''))));
+$frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/');
+$extraOrigins = array_filter(array_map(
+    static fn (string $origin): string => rtrim(trim($origin), '/'),
+    explode(',', (string) env('CORS_ALLOWED_ORIGINS', ''))
+));
+
+$localOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+];
 
 $allowedOrigins = array_values(array_unique(array_filter(array_merge(
     [$frontendUrl],
     $extraOrigins,
-    [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-    ]
+    $localOrigins
 ))));
 
 return [
@@ -22,7 +27,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Explicit origins are required when supports_credentials is true.
-    | Set FRONTEND_URL and optionally CORS_ALLOWED_ORIGINS (comma-separated).
+    | Production: set FRONTEND_URL=https://rite.minsuibibes.com
+    | Optional: CORS_ALLOWED_ORIGINS=https://rite.minsuibibes.com,https://www.rite.minsuibibes.com
     |
     */
 
@@ -32,7 +38,10 @@ return [
 
     'allowed_origins' => $allowedOrigins,
 
-    'allowed_origins_patterns' => [],
+    // Safety net for production SPA hosts on minsuibibes.com
+    'allowed_origins_patterns' => [
+        '#^https://([a-z0-9-]+\.)?minsuibibes\.com$#',
+    ],
 
     'allowed_headers' => ['*'],
 
