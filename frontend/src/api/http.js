@@ -5,16 +5,32 @@ const baseURL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:8000";
 
-export const http = axios.create({
-  baseURL: baseURL.endsWith('/api') ? baseURL : `${baseURL}/api`,
+const apiRoot = baseURL.endsWith("/api") ? baseURL.slice(0, -4) : baseURL;
+const apiBase = baseURL.endsWith("/api") ? baseURL : `${baseURL}/api`;
+
+const shared = {
   withCredentials: true,
+  withXSRFToken: true,
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest",
+  },
+};
+
+export const http = axios.create({
+  ...shared,
+  baseURL: apiBase,
+  headers: {
+    ...shared.headers,
+    "Content-Type": "application/json",
   },
 });
 
+/** Hit Sanctum so Laravel sets XSRF-TOKEN + session cookies (Domain must be shared). */
 export async function csrf() {
-  await axios.get(`${baseURL}/sanctum/csrf-cookie`, { withCredentials: true });
+  await axios.get(`${apiRoot}/sanctum/csrf-cookie`, {
+    ...shared,
+  });
 }
