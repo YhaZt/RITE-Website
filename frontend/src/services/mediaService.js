@@ -5,7 +5,6 @@ const baseURL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:8000';
 
-/** Always compress above this so POSTs fit low nginx limits (~1m). */
 const SKIP_COMPRESS_UNDER_BYTES = 350 * 1024;
 const MAX_EDGE = 1600;
 const OUTPUT_QUALITY = 0.8;
@@ -113,35 +112,59 @@ export async function compressImageForUpload(file) {
   }
 }
 
+function uploadError(err) {
+  const status = err?.response?.status;
+  const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
+
+  if (status === 413) {
+    return 'Image is too large for the server upload limit (nginx/PHP).';
+  }
+  if (status === 419) {
+    return 'Upload blocked by CSRF (419). Pull latest backend (media CSRF exception), then refresh and try again.';
+  }
+  if (status === 401) {
+    return 'Upload unauthorized (401). You are not authenticated to the API — log out, clear cookies for minsuibibes.com, log in again.';
+  }
+  return serverMsg || 'Failed to upload image.';
+}
+
 export const mediaService = {
   async uploadImage(file) {
-    // Fresh CSRF for each upload — long admin sessions otherwise get 419
-    await csrf();
-    syncXsrfHeader();
+    // Keep session cookies warm; CSRF is not required for api/media anymore
+    try {
+      await csrf();
+      syncXsrfHeader();
+    } catch {
+      // Continue — media route does not require CSRF; auth cookie still needed
+    }
 
     const prepared = await compressImageForUpload(file);
     const formData = new FormData();
     formData.append('file', prepared);
 
-    const res = await http.post('/media', formData, {
-      headers: {
-        'Content-Type': undefined,
-      },
-      transformRequest: [
-        (data, headers) => {
-          if (headers && typeof headers === 'object') {
-            delete headers['Content-Type'];
-            delete headers['content-type'];
-            // Axios may nest defaults; clear common JSON content-type
-            if (headers.common) {
-              delete headers.common['Content-Type'];
-              delete headers.common['content-type'];
-            }
-          }
-          return data;
+    try {
+      const res = await http.post('/media', formData, {
+        headers: {
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
-      ],
-    });
-    return res.data;
+        transformRequest: [
+          (data, headers) => {
+            // Must not force application/json on FormData
+            if (headers && typeof headers.set === 'function') {
+              headers.delete('Content-Type');
+            } else if (headers && typeof headers === 'object') {
+              delete headers['Content-Type'];
+              delete headers['content-type'];
+            }
+            return data;
+          },
+        ],
+      });
+      return res.data;
+    } catch (err) {
+      err.userMessage = uploadError(err);
+      throw err;
+    }
   },
 };

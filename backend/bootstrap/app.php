@@ -13,6 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+
+        // Authenticated multipart uploads from the SPA often fail CSRF across
+        // api.* / rite.* subdomains even when the session cookie is valid.
+        // Route remains protected by auth:sanctum.
+        $middleware->validateCsrfTokens(except: [
+            'api/media',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

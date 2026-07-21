@@ -380,12 +380,16 @@ const triggerImagePick = () => imageInput.value?.click();
 const triggerGalleryPick = () => galleryInput.value?.click();
 
 const uploadErrorMessage = (err) => {
+  if (err?.userMessage) return err.userMessage;
   const status = err?.response?.status;
   if (status === 413) {
-    return 'The image is too large for the server upload limit. Try a smaller file, or ask the admin to raise PHP/nginx upload limits.';
+    return 'The image is too large for the server upload limit. Try a smaller file, or raise PHP/nginx upload limits.';
   }
-  if (status === 401 || status === 419) {
-    return 'Your session expired. Refresh the page and sign in again, then retry the upload.';
+  if (status === 419) {
+    return 'Upload blocked by CSRF (419). Deploy latest backend, refresh, then retry.';
+  }
+  if (status === 401) {
+    return 'Upload unauthorized (401). Log out, clear minsuibibes.com cookies, log in again.';
   }
   return (
     err?.response?.data?.message ||
